@@ -89,8 +89,29 @@ $url = "https://api-hari-libur.vercel.app/api?month={$month}&year={$year}";
 $json = $fetchJson($url);
 if ($json !== null) {
   $decoded = json_decode($json, true);
-  if (is_array($decoded) && count($decoded) > 0) {
-    $events = $decoded;
+  $normalized = [];
+
+  // Format baru: { status, code, data: [{ date, description }] }
+  if (is_array($decoded) && isset($decoded['data']) && is_array($decoded['data'])) {
+    foreach ($decoded['data'] as $row) {
+      if (!is_array($row)) continue;
+      $date = $row['date'] ?? '';
+      if (!is_string($date) || strlen($date) < 10) continue;
+      $normalized[] = [
+        'event_date' => $date,
+        'event_name' => $row['description'] ?? 'Hari libur',
+        'is_national_holiday' => true,
+      ];
+    }
+  }
+
+  // Format lama: [{ event_date, event_name, is_national_holiday }]
+  if (empty($normalized) && is_array($decoded) && isset($decoded[0]) && is_array($decoded[0])) {
+    $normalized = $decoded;
+  }
+
+  if (!empty($normalized)) {
+    $events = $normalized;
     $apiOk  = true;
     $liburSource = 'API Hari Libur (api-hari-libur.vercel.app)';
   }

@@ -219,7 +219,15 @@ $bgUrl = '';
 if ($bgRelativePath !== '') {
   $bgPath = __DIR__ . '/' . $bgRelativePath;
   $bgVer  = file_exists($bgPath) ? filemtime($bgPath) : time();
-  $bgUrl  = $bgRelativePath . '?v=' . (int)$bgVer;
+  $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+  $baseUrl = '';
+  if ($scriptName !== '' && substr($scriptName, 0, 1) === '/') {
+    $baseUrl = rtrim(dirname($scriptName), '/');
+    if ($baseUrl === '/' || $baseUrl === '\\' || $baseUrl === '.') {
+      $baseUrl = '';
+    }
+  }
+  $bgUrl  = $baseUrl . '/' . ltrim($bgRelativePath, '/') . '?v=' . (int)$bgVer;
 }
 $bgCssValue = $bgUrl !== '' ? "url('{$bgUrl}')" : 'none';
 

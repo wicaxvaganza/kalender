@@ -163,10 +163,30 @@ if ($bmkgJson === false) {
 // ==========================
 // BACKGROUND FILE (cache-busting)
 // ==========================
-$bgFile = 'rsbl.jpeg'; // pastikan file ada 1 folder dengan index.php
-$bgPath = __DIR__ . '/' . $bgFile;
-$bgVer  = file_exists($bgPath) ? filemtime($bgPath) : time();
-$bgUrl  = $bgFile . '?v=' . (int)$bgVer;
+$bgCandidates = ['rsbl.jpeg', 'rsbl.jpg', 'rsbl.png', 'background.jpg', 'background.jpeg', 'background.png'];
+$bgFile = '';
+
+foreach ($bgCandidates as $candidate) {
+  if (is_file(__DIR__ . '/' . $candidate)) {
+    $bgFile = $candidate;
+    break;
+  }
+}
+
+if ($bgFile === '') {
+  $globHits = glob(__DIR__ . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE);
+  if (is_array($globHits) && !empty($globHits)) {
+    $bgFile = basename($globHits[0]);
+  }
+}
+
+$bgUrl = '';
+if ($bgFile !== '') {
+  $bgPath = __DIR__ . '/' . $bgFile;
+  $bgVer  = file_exists($bgPath) ? filemtime($bgPath) : time();
+  $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
+}
+$bgCssValue = $bgUrl !== '' ? "url('{$bgUrl}')" : 'none';
 
 $mainCssPath = __DIR__ . '/assets/css/main.css';
 $tvCssPath   = __DIR__ . '/assets/css/tv.css';
@@ -189,7 +209,7 @@ $appJsVer    = file_exists($appJsPath) ? filemtime($appJsPath) : time();
 <link rel="stylesheet" href="assets/css/tv.css?v=<?= (int)$tvCssVer ?>">
 <?php endif; ?>
 </head>
-<body class="<?= $isTvMode ? 'display-tv' : '' ?>" style="--bg-image: url('<?= htmlspecialchars($bgUrl, ENT_QUOTES) ?>');">
+<body class="<?= $isTvMode ? 'display-tv' : '' ?>" style="--bg-image: <?= htmlspecialchars($bgCssValue, ENT_QUOTES) ?>;">
 
 <div class="wrapper">
   <div class="clock-card">

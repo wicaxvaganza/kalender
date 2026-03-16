@@ -30,6 +30,11 @@ function setOverlayStrength(mid, end) {
 }
 
 function adjustOverlayByBackground() {
+  if (!APP_DATA.bgUrl) {
+    setOverlayStrength(0.10, 0.18);
+    return;
+  }
+
   const img = new Image();
   img.onload = () => {
     const canvas = document.createElement('canvas');

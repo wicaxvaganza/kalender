@@ -18,19 +18,75 @@ $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 // ==========================
 // 1) API HARI LIBUR
 // ==========================
+$fetchJson = function(string $url, int $timeout = 8): ?string {
+  $ctx = stream_context_create([
+    'http' => [
+      'method' => 'GET',
+      'timeout' => $timeout,
+      'header' => "User-Agent: Kalender/1.0\r\n",
+    ],
+    'ssl' => [
+      'verify_peer' => true,
+      'verify_peer_name' => true,
+    ],
+  ]);
+  $raw = @file_get_contents($url, false, $ctx);
+  if ($raw !== false && trim($raw) !== '') return $raw;
+
+  // Fallback untuk environment lokal yang CA bundle-nya belum siap.
+  $ctxInsecure = stream_context_create([
+    'http' => [
+      'method' => 'GET',
+      'timeout' => $timeout,
+      'header' => "User-Agent: Kalender/1.0\r\n",
+    ],
+    'ssl' => [
+      'verify_peer' => false,
+      'verify_peer_name' => false,
+    ],
+  ]);
+  $raw2 = @file_get_contents($url, false, $ctxInsecure);
+  if ($raw2 !== false && trim($raw2) !== '') return $raw2;
+
+  if (function_exists('curl_init')) {
+    $request = function(bool $insecure = false) use ($url, $timeout): ?string {
+      $ch = curl_init($url);
+      $opt = [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => $timeout,
+        CURLOPT_USERAGENT => 'Kalender/1.0',
+      ];
+      if ($insecure) {
+        $opt[CURLOPT_SSL_VERIFYPEER] = false;
+        $opt[CURLOPT_SSL_VERIFYHOST] = 0;
+      }
+      curl_setopt_array($ch, $opt);
+      $resp = curl_exec($ch);
+      $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      curl_close($ch);
+      if ($resp !== false && $code >= 200 && $code < 300 && trim($resp) !== '') {
+        return $resp;
+      }
+      return null;
+    };
+
+    $resp = $request(false);
+    if ($resp !== null) return $resp;
+    $respInsecure = $request(true);
+    if ($respInsecure !== null) return $respInsecure;
+  }
+
+  return null;
+};
+
 $apiOk = false;
-$options = [
-  'http' => [
-    'method'  => 'GET',
-    'timeout' => 5,
-  ]
-];
-$context = stream_context_create($options);
 
 // Primary API
 $url = "https://hari-libur-api.vercel.app/api?month={$month}&year={$year}";
-$json = @file_get_contents($url, false, $context);
-if ($json !== false && trim($json) !== '') {
+$json = $fetchJson($url);
+if ($json !== null) {
   $decoded = json_decode($json, true);
   if (is_array($decoded) && count($decoded) > 0) {
     $events = $decoded;
@@ -42,8 +98,8 @@ if ($json !== false && trim($json) !== '') {
 // Fallback API
 if (!$apiOk) {
   $nagerUrl = "https://date.nager.at/api/v3/PublicHolidays/{$year}/ID";
-  $nagerJson = @file_get_contents($nagerUrl, false, $context);
-  if ($nagerJson !== false && trim($nagerJson) !== '') {
+  $nagerJson = $fetchJson($nagerUrl);
+  if ($nagerJson !== null) {
     $nagerDecoded = json_decode($nagerJson, true);
     if (is_array($nagerDecoded) && !empty($nagerDecoded)) {
       $mapped = [];

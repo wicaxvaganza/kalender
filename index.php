@@ -163,28 +163,38 @@ if ($bmkgJson === false) {
 // ==========================
 // BACKGROUND FILE (cache-busting)
 // ==========================
-$bgCandidates = ['rsbl.jpeg', 'rsbl.jpg', 'rsbl.png', 'background.jpg', 'background.jpeg', 'background.png'];
-$bgFile = '';
+$bgCandidates = [
+  'rsbl.jpeg',
+  'rsbl.jpg',
+  'rsbl.png',
+  'background.jpg',
+  'background.jpeg',
+  'background.png',
+  'assets/rsbl.jpeg',
+  'assets/rsbl.jpg',
+  'assets/rsbl.png',
+];
+$bgRelativePath = '';
 
 foreach ($bgCandidates as $candidate) {
   if (is_file(__DIR__ . '/' . $candidate)) {
-    $bgFile = $candidate;
+    $bgRelativePath = $candidate;
     break;
   }
 }
 
-if ($bgFile === '') {
+if ($bgRelativePath === '') {
   $globHits = glob(__DIR__ . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE);
   if (is_array($globHits) && !empty($globHits)) {
-    $bgFile = basename($globHits[0]);
+    $bgRelativePath = basename($globHits[0]);
   }
 }
 
 $bgUrl = '';
-if ($bgFile !== '') {
-  $bgPath = __DIR__ . '/' . $bgFile;
+if ($bgRelativePath !== '') {
+  $bgPath = __DIR__ . '/' . $bgRelativePath;
   $bgVer  = file_exists($bgPath) ? filemtime($bgPath) : time();
-  $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
+  $bgUrl  = $bgRelativePath . '?v=' . (int)$bgVer;
 }
 $bgCssValue = $bgUrl !== '' ? "url('{$bgUrl}')" : 'none';
 

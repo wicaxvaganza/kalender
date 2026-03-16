@@ -1,0 +1,57 @@
+:root {
+  --tv-scale: 1;
+}
+body.display-tv {
+  overflow: hidden;
+}
+.display-tv .wrapper {
+  width: 100vw;
+  height: 100vh;
+  padding: 2.2vh 2.2vw;
+}
+.display-tv .clock-card {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border-radius: 28px;
+}
+.display-tv .dashboard-grid {
+  grid-template-columns: 1fr 2.8fr 1fr;
+  gap: clamp(16px, 1.8vw, 30px);
+  height: 100%;
+}
+.display-tv .time-display {
+  font-size: clamp(64px, 7.4vw, 140px);
+  line-height: .92;
+}
+.display-tv .date-main {
+  font-size: clamp(24px, 1.8vw, 36px);
+}
+.display-tv .day-progress,
+.display-tv .holiday-title,
+.display-tv .holiday-source,
+.display-tv .today-event-item,
+.display-tv .ticker-row,
+.display-tv .weather-temp,
+.display-tv .weather-desc,
+.display-tv .prayer-row {
+  font-size: clamp(17px, 1.1vw, 24px);
+}
+.display-tv .weather-city,
+.display-tv .prayer-title {
+  font-size: clamp(18px, 1.15vw, 24px);
+}
+.display-tv .holiday-section,
+.display-tv .weather-badge,
+.display-tv .prayer-badge {
+  min-height: 0;
+}
+.display-tv .ticker-wrapper {
+  min-height: 168px;
+}
+@media (max-width: 1280px) {
+  .display-tv .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

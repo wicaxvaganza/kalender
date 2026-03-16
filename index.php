@@ -17,45 +17,7 @@ $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 $isTvMode = isset($_GET['display']) && strtolower((string) $_GET['display']) === 'tv';
 
 // ==========================
-// HELPER: LOAD DARI FILE JSON
-// ==========================
-function loadLiburFromFile(string $filePath, int $year, int $month, string &$errMsg): array {
-  if (!is_readable($filePath)) {
-    $errMsg = 'File hari libur tidak ditemukan/ tidak bisa dibaca: ' . basename($filePath);
-    return [];
-  }
-
-  $raw = @file_get_contents($filePath);
-  if ($raw === false || trim($raw) === '') {
-    $errMsg = 'Gagal membaca file hari libur: ' . basename($filePath);
-    return [];
-  }
-
-  $decoded = json_decode($raw, true);
-  if (!is_array($decoded)) {
-    $errMsg = 'Format JSON hari libur (file) tidak valid.';
-    return [];
-  }
-
-  $ym = sprintf('%04d-%02d', $year, $month);
-
-  // Filter: hanya event yang sesuai bulan & tahun sekarang
-  $filtered = array_values(array_filter($decoded, function($ev) use ($ym) {
-    $date = $ev['event_date'] ?? '';
-    return is_string($date) && substr($date, 0, 7) === $ym;
-  }));
-
-  // Sort by tanggal
-  usort($filtered, function($a, $b) {
-    return strcmp($a['event_date'] ?? '', $b['event_date'] ?? '');
-  });
-
-  $errMsg = ''; // sukses
-  return $filtered;
-}
-
-// ==========================
-// 1) API HARI LIBUR (dengan fallback ke 2026.json)
+// 1) API HARI LIBUR
 // ==========================
 $url = "https://hari-libur-api.vercel.app/api?month={$month}&year={$year}";
 $options = [
@@ -78,20 +40,8 @@ if ($json !== false && trim($json) !== '') {
 }
 
 if (!$apiOk) {
-  // Fallback ke file lokal (disarankan untuk 2026.json)
-  $localLiburFile = __DIR__ . '/2026.json';
-  $fileErr = '';
-  $eventsFromFile = loadLiburFromFile($localLiburFile, $year, $month, $fileErr);
-
-  if (!empty($eventsFromFile)) {
-    $events = $eventsFromFile;
-    $errorLibur = ''; // sukses via file
-    $liburSource = 'File 2026';
-  } else {
-    // kalau file juga gagal
-    $errorLibur = $fileErr ?: 'Gagal memuat data hari libur (API & file).';
-    $liburSource = 'Tidak tersedia';
-  }
+  $errorLibur = 'Gagal memuat data hari libur dari API.';
+  $liburSource = 'Tidak tersedia';
 }
 
 // Pisahkan today / upcoming (kalau events berhasil didapat)

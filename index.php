@@ -14,6 +14,7 @@ $todayEvents  = [];
 $tickerEvents = [];
 $liburSource  = 'API Hari Libur';
 $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
+$isTvMode = isset($_GET['display']) && strtolower((string) $_GET['display']) === 'tv';
 
 // ==========================
 // 1) API HARI LIBUR
@@ -692,6 +693,64 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     border-color: rgba(var(--accent-rgb), 0.35);
   }
 
+  /* =========================
+     TV MODE (32")
+     aktif via ?display=tv
+     ========================= */
+  body.display-tv .wrapper{
+    padding: 2.2vh 2.2vw;
+  }
+  body.display-tv .clock-card{
+    max-width: none;
+    height: 100%;
+    border-radius: 28px;
+    padding: clamp(20px, 2.8vh, 36px) clamp(24px, 2.8vw, 42px) clamp(24px, 3vh, 40px);
+  }
+  body.display-tv .clock-card::before{
+    border-radius: 28px;
+  }
+  body.display-tv .dashboard-grid{
+    grid-template-columns: 1fr 2.8fr 1fr;
+    grid-template-areas: "left center right";
+    gap: clamp(16px, 1.8vw, 30px);
+    height: 100%;
+  }
+  body.display-tv .left-panel,
+  body.display-tv .right-panel{
+    max-width: none;
+  }
+  body.display-tv .center-panel{
+    align-self: stretch;
+  }
+  body.display-tv .time-display{
+    font-size: clamp(76px, 8.8vw, 160px);
+    line-height: .92;
+  }
+  body.display-tv .date-main{
+    font-size: clamp(34px, 2.4vw, 52px);
+  }
+  body.display-tv .day-progress{
+    font-size: clamp(20px, 1.3vw, 30px);
+  }
+  body.display-tv .holiday-title{
+    font-size: clamp(24px, 1.7vw, 38px);
+  }
+  body.display-tv .holiday-source,
+  body.display-tv .today-event-item,
+  body.display-tv .ticker-row,
+  body.display-tv .weather-temp,
+  body.display-tv .weather-desc,
+  body.display-tv .prayer-row{
+    font-size: clamp(18px, 1.1vw, 26px);
+  }
+  body.display-tv .weather-city,
+  body.display-tv .prayer-title{
+    font-size: clamp(15px, .9vw, 20px);
+  }
+  body.display-tv .ticker-wrapper{
+    height: clamp(80px, 11vh, 120px);
+  }
+
   @media (max-width: 1100px) {
     .dashboard-grid { grid-template-columns: 1fr; gap: 14px; }
     .dashboard-grid { grid-template-areas: "center" "left" "right"; }
@@ -717,7 +776,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
 </style>
 </head>
-<body>
+<body class="<?= $isTvMode ? 'display-tv' : '' ?>">
 
 <div class="wrapper">
   <div class="clock-card">

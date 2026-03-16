@@ -12,141 +12,36 @@ $events       = [];
 $errorLibur   = '';
 $todayEvents  = [];
 $tickerEvents = [];
-$liburSource  = 'API Hari Libur';
+$liburSource  = 'File 2026.json';
 $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 $isTvMode = isset($_GET['display']) && strtolower((string) $_GET['display']) === 'tv';
 
 // ==========================
-// 1) API HARI LIBUR
+// 1) HARI LIBUR DARI FILE 2026.JSON
 // ==========================
-$fetchJson = function(string $url, int $timeout = 8): ?string {
-  $ctx = stream_context_create([
-    'http' => [
-      'method' => 'GET',
-      'timeout' => $timeout,
-      'header' => "User-Agent: Kalender/1.0\r\n",
-    ],
-    'ssl' => [
-      'verify_peer' => true,
-      'verify_peer_name' => true,
-    ],
-  ]);
-  $raw = @file_get_contents($url, false, $ctx);
-  if ($raw !== false && trim($raw) !== '') return $raw;
+$liburFile = __DIR__ . '/2026.json';
 
-  // Fallback untuk environment lokal yang CA bundle-nya belum siap.
-  $ctxInsecure = stream_context_create([
-    'http' => [
-      'method' => 'GET',
-      'timeout' => $timeout,
-      'header' => "User-Agent: Kalender/1.0\r\n",
-    ],
-    'ssl' => [
-      'verify_peer' => false,
-      'verify_peer_name' => false,
-    ],
-  ]);
-  $raw2 = @file_get_contents($url, false, $ctxInsecure);
-  if ($raw2 !== false && trim($raw2) !== '') return $raw2;
-
-  if (function_exists('curl_init')) {
-    $request = function(bool $insecure = false) use ($url, $timeout): ?string {
-      $ch = curl_init($url);
-      $opt = [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_CONNECTTIMEOUT => 5,
-        CURLOPT_TIMEOUT => $timeout,
-        CURLOPT_USERAGENT => 'Kalender/1.0',
-      ];
-      if ($insecure) {
-        $opt[CURLOPT_SSL_VERIFYPEER] = false;
-        $opt[CURLOPT_SSL_VERIFYHOST] = 0;
-      }
-      curl_setopt_array($ch, $opt);
-      $resp = curl_exec($ch);
-      $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-      curl_close($ch);
-      if ($resp !== false && $code >= 200 && $code < 300 && trim($resp) !== '') {
-        return $resp;
-      }
-      return null;
-    };
-
-    $resp = $request(false);
-    if ($resp !== null) return $resp;
-    $respInsecure = $request(true);
-    if ($respInsecure !== null) return $respInsecure;
-  }
-
-  return null;
-};
-
-$apiOk = false;
-
-// Primary API: Nager
-$nagerUrl = "https://date.nager.at/api/v3/PublicHolidays/{$year}/ID";
-$nagerJson = $fetchJson($nagerUrl);
-if ($nagerJson !== null) {
-  $nagerDecoded = json_decode($nagerJson, true);
-  if (is_array($nagerDecoded) && !empty($nagerDecoded)) {
-    $mapped = [];
-    foreach ($nagerDecoded as $item) {
-      if (!is_array($item)) continue;
-      $date = $item['date'] ?? '';
-      if (!is_string($date) || strlen($date) < 10) continue;
-      if ((int) substr($date, 5, 2) !== $month) continue;
-
-      $mapped[] = [
-        'event_date' => $date,
-        'event_name' => $item['localName'] ?? ($item['name'] ?? 'Hari libur'),
-        'is_national_holiday' => true,
-      ];
-    }
-    if (!empty($mapped)) {
-      $events = $mapped;
-      $apiOk = true;
-      $liburSource = 'Nager Public Holidays API';
-    }
-  }
-}
-
-// Fallback API: api-hari-libur.vercel.app
-if (!$apiOk) {
-  $url = "https://api-hari-libur.vercel.app/api?month={$month}&year={$year}";
-  $json = $fetchJson($url);
-  if ($json !== null) {
-    $decoded = json_decode($json, true);
-    $normalized = [];
-
-    if (is_array($decoded) && isset($decoded['data']) && is_array($decoded['data'])) {
-      foreach ($decoded['data'] as $row) {
-        if (!is_array($row)) continue;
-        $date = $row['date'] ?? '';
-        if (!is_string($date) || strlen($date) < 10) continue;
-        $normalized[] = [
-          'event_date' => $date,
-          'event_name' => $row['description'] ?? 'Hari libur',
-          'is_national_holiday' => true,
-        ];
-      }
-    }
-
-    if (empty($normalized) && is_array($decoded) && isset($decoded[0]) && is_array($decoded[0])) {
-      $normalized = $decoded;
-    }
-
-    if (!empty($normalized)) {
-      $events = $normalized;
-      $apiOk  = true;
-      $liburSource = 'API Hari Libur (api-hari-libur.vercel.app)';
-    }
-  }
-}
-
-if (!$apiOk) {
-  $errorLibur = 'Gagal memuat data hari libur dari API.';
+if (!is_readable($liburFile)) {
+  $errorLibur = 'File hari libur tidak ditemukan/ tidak bisa dibaca: 2026.json';
   $liburSource = 'Tidak tersedia';
+} else {
+  $rawLibur = @file_get_contents($liburFile);
+  $decodedLibur = json_decode((string)$rawLibur, true);
+
+  if (!is_array($decodedLibur)) {
+    $errorLibur = 'Format 2026.json tidak valid.';
+    $liburSource = 'Tidak tersedia';
+  } else {
+    $ym = sprintf('%04d-%02d', $year, $month);
+    $events = array_values(array_filter($decodedLibur, function($ev) use ($ym) {
+      $date = $ev['event_date'] ?? '';
+      return is_string($date) && substr($date, 0, 7) === $ym;
+    }));
+
+    if (empty($events)) {
+      $errorLibur = 'Data hari libur untuk bulan ini tidak ditemukan di 2026.json.';
+    }
+  }
 }
 
 // Pisahkan today / upcoming (kalau events berhasil didapat)

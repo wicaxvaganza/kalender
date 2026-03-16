@@ -84,64 +84,62 @@ $fetchJson = function(string $url, int $timeout = 8): ?string {
 
 $apiOk = false;
 
-// Primary API (sesuai permintaan)
-$url = "https://api-hari-libur.vercel.app/api?month={$month}&year={$year}";
-$json = $fetchJson($url);
-if ($json !== null) {
-  $decoded = json_decode($json, true);
-  $normalized = [];
-
-  // Format baru: { status, code, data: [{ date, description }] }
-  if (is_array($decoded) && isset($decoded['data']) && is_array($decoded['data'])) {
-    foreach ($decoded['data'] as $row) {
-      if (!is_array($row)) continue;
-      $date = $row['date'] ?? '';
+// Primary API: Nager
+$nagerUrl = "https://date.nager.at/api/v3/PublicHolidays/{$year}/ID";
+$nagerJson = $fetchJson($nagerUrl);
+if ($nagerJson !== null) {
+  $nagerDecoded = json_decode($nagerJson, true);
+  if (is_array($nagerDecoded) && !empty($nagerDecoded)) {
+    $mapped = [];
+    foreach ($nagerDecoded as $item) {
+      if (!is_array($item)) continue;
+      $date = $item['date'] ?? '';
       if (!is_string($date) || strlen($date) < 10) continue;
-      $normalized[] = [
+      if ((int) substr($date, 5, 2) !== $month) continue;
+
+      $mapped[] = [
         'event_date' => $date,
-        'event_name' => $row['description'] ?? 'Hari libur',
+        'event_name' => $item['localName'] ?? ($item['name'] ?? 'Hari libur'),
         'is_national_holiday' => true,
       ];
     }
-  }
-
-  // Format lama: [{ event_date, event_name, is_national_holiday }]
-  if (empty($normalized) && is_array($decoded) && isset($decoded[0]) && is_array($decoded[0])) {
-    $normalized = $decoded;
-  }
-
-  if (!empty($normalized)) {
-    $events = $normalized;
-    $apiOk  = true;
-    $liburSource = 'API Hari Libur (api-hari-libur.vercel.app)';
+    if (!empty($mapped)) {
+      $events = $mapped;
+      $apiOk = true;
+      $liburSource = 'Nager Public Holidays API';
+    }
   }
 }
 
-// Fallback API
+// Fallback API: api-hari-libur.vercel.app
 if (!$apiOk) {
-  $nagerUrl = "https://date.nager.at/api/v3/PublicHolidays/{$year}/ID";
-  $nagerJson = $fetchJson($nagerUrl);
-  if ($nagerJson !== null) {
-    $nagerDecoded = json_decode($nagerJson, true);
-    if (is_array($nagerDecoded) && !empty($nagerDecoded)) {
-      $mapped = [];
-      foreach ($nagerDecoded as $item) {
-        if (!is_array($item)) continue;
-        $date = $item['date'] ?? '';
-        if (!is_string($date) || strlen($date) < 10) continue;
-        if ((int) substr($date, 5, 2) !== $month) continue;
+  $url = "https://api-hari-libur.vercel.app/api?month={$month}&year={$year}";
+  $json = $fetchJson($url);
+  if ($json !== null) {
+    $decoded = json_decode($json, true);
+    $normalized = [];
 
-        $mapped[] = [
+    if (is_array($decoded) && isset($decoded['data']) && is_array($decoded['data'])) {
+      foreach ($decoded['data'] as $row) {
+        if (!is_array($row)) continue;
+        $date = $row['date'] ?? '';
+        if (!is_string($date) || strlen($date) < 10) continue;
+        $normalized[] = [
           'event_date' => $date,
-          'event_name' => $item['localName'] ?? ($item['name'] ?? 'Hari libur'),
+          'event_name' => $row['description'] ?? 'Hari libur',
           'is_national_holiday' => true,
         ];
       }
-      if (!empty($mapped)) {
-        $events = $mapped;
-        $apiOk = true;
-        $liburSource = 'Nager Public Holidays API';
-      }
+    }
+
+    if (empty($normalized) && is_array($decoded) && isset($decoded[0]) && is_array($decoded[0])) {
+      $normalized = $decoded;
+    }
+
+    if (!empty($normalized)) {
+      $events = $normalized;
+      $apiOk  = true;
+      $liburSource = 'API Hari Libur (api-hari-libur.vercel.app)';
     }
   }
 }

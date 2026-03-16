@@ -84,15 +84,15 @@ $fetchJson = function(string $url, int $timeout = 8): ?string {
 
 $apiOk = false;
 
-// Primary API
-$url = "https://hari-libur-api.vercel.app/api?month={$month}&year={$year}";
+// Primary API (sesuai permintaan)
+$url = "https://api-hari-libur.vercel.app/api?month={$month}&year={$year}";
 $json = $fetchJson($url);
 if ($json !== null) {
   $decoded = json_decode($json, true);
   if (is_array($decoded) && count($decoded) > 0) {
     $events = $decoded;
     $apiOk  = true;
-    $liburSource = 'API Hari Libur';
+    $liburSource = 'API Hari Libur (api-hari-libur.vercel.app)';
   }
 }
 

@@ -885,7 +885,6 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 
           <div class="holiday-section">
             <div class="holiday-title">HARI LIBUR BULAN INI</div>
-            <div class="holiday-source">Sumber: <?= htmlspecialchars($liburSource) ?></div>
 
             <?php if ($errorLibur): ?>
               <div class="holiday-error"><?= htmlspecialchars($errorLibur) ?></div>

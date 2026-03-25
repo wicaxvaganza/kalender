@@ -12,6 +12,7 @@ $events       = [];
 $errorLibur   = '';
 $todayEvents  = [];
 $tickerEvents = [];
+$holidayEmptyMessage = '';
 $liburSource  = 'API libur.deno.dev';
 $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 $isTvMode = isset($_GET['display']) && strtolower((string) $_GET['display']) === 'tv';
@@ -107,7 +108,7 @@ if (!$errorLibur) {
     }));
 
     if (empty($events)) {
-      $errorLibur = 'Data hari libur untuk bulan ini tidak ditemukan.';
+      $holidayEmptyMessage = 'Tidak ada hari libur pada bulan ini.';
     }
   }
 }
@@ -143,6 +144,9 @@ foreach ($tickerEvents as $ev) {
   ];
 }
 $hasUpcoming = !empty($todayEvents) || !empty($tickerEvents);
+if (!$errorLibur && !$hasUpcoming && empty($holidayEmptyMessage)) {
+  $holidayEmptyMessage = 'Tidak ada hari libur tersisa di bulan ini.';
+}
 
 // ==========================
 // 2) API BMKG PRAKIRAAN CUACA (adm4 = 35.10.16.1010)
@@ -886,7 +890,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
             <?php if ($errorLibur): ?>
               <div class="holiday-error"><?= htmlspecialchars($errorLibur) ?></div>
             <?php elseif (!$hasUpcoming): ?>
-              <div class="holiday-empty">Tidak ada hari libur pada bulan ini.</div>
+              <div class="holiday-empty"><?= htmlspecialchars($holidayEmptyMessage) ?></div>
             <?php else: ?>
 
               <?php if (!empty($todayEvents)): ?>

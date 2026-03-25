@@ -12,34 +12,102 @@ $events       = [];
 $errorLibur   = '';
 $todayEvents  = [];
 $tickerEvents = [];
-$liburSource  = 'File 2026.json';
+$liburSource  = 'API libur.deno.dev';
 $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 $isTvMode = isset($_GET['display']) && strtolower((string) $_GET['display']) === 'tv';
 
 // ==========================
-// 1) HARI LIBUR DARI FILE 2026.JSON
+// 1) HARI LIBUR DARI API libur.deno.dev
 // ==========================
-$liburFile = __DIR__ . '/2026.json';
+$liburUrl  = "https://libur.deno.dev/api?year={$year}";
+$liburFile = __DIR__ . '/2026.json'; // fallback lokal jika API tidak bisa diakses
+$rawLibur  = false;
 
-if (!is_readable($liburFile)) {
-  $errorLibur = 'File hari libur tidak ditemukan/ tidak bisa dibaca: 2026.json';
-  $liburSource = 'Tidak tersedia';
-} else {
-  $rawLibur = @file_get_contents($liburFile);
+// Request API dengan timeout + user-agent.
+$liburContext = stream_context_create([
+  'http' => [
+    'method'        => 'GET',
+    'timeout'       => 10,
+    'ignore_errors' => true,
+    'header'        => "Accept: application/json\r\nUser-Agent: Kalender-RSBL/1.0\r\n",
+  ],
+  'ssl' => [
+    'verify_peer'      => false,
+    'verify_peer_name' => false,
+  ],
+]);
+$rawLibur = @file_get_contents($liburUrl, false, $liburContext);
+
+if ($rawLibur === false && function_exists('curl_init')) {
+  $ch = curl_init($liburUrl);
+  if ($ch !== false) {
+    curl_setopt_array($ch, [
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_CONNECTTIMEOUT => 5,
+      CURLOPT_TIMEOUT        => 10,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTPHEADER     => [
+        'Accept: application/json',
+        'User-Agent: Kalender-RSBL/1.0',
+      ],
+      CURLOPT_SSL_VERIFYPEER => false,
+      CURLOPT_SSL_VERIFYHOST => 0,
+    ]);
+    $curlRes = curl_exec($ch);
+    if (is_string($curlRes) && $curlRes !== '') {
+      $rawLibur = $curlRes;
+    }
+    curl_close($ch);
+  }
+}
+
+if ($rawLibur === false) {
+  if (is_readable($liburFile)) {
+    $rawLibur = @file_get_contents($liburFile);
+    $liburSource = 'File 2026.json (fallback)';
+  } else {
+    $errorLibur = 'Gagal memuat data hari libur.';
+    $liburSource = 'Tidak tersedia';
+  }
+}
+
+if (!$errorLibur) {
   $decodedLibur = json_decode((string)$rawLibur, true);
 
   if (!is_array($decodedLibur)) {
-    $errorLibur = 'Format 2026.json tidak valid.';
+    $errorLibur = 'Format data hari libur tidak valid.';
     $liburSource = 'Tidak tersedia';
   } else {
+    // dukung 2 format:
+    // 1) libur.deno.dev -> { date, name }
+    // 2) fallback file lama -> { event_date, event_name, is_national_holiday }
+    $normalized = [];
+    foreach ($decodedLibur as $item) {
+      if (!is_array($item)) continue;
+
+      $date = $item['event_date'] ?? $item['date'] ?? '';
+      $name = $item['event_name'] ?? $item['name'] ?? 'Hari libur';
+      if (!is_string($date) || $date === '') continue;
+
+      $isNational = isset($item['is_national_holiday'])
+        ? !empty($item['is_national_holiday'])
+        : (stripos((string)$name, 'cuti bersama') === false);
+
+      $normalized[] = [
+        'event_date'          => $date,
+        'event_name'          => $name,
+        'is_national_holiday' => $isNational,
+      ];
+    }
+
     $ym = sprintf('%04d-%02d', $year, $month);
-    $events = array_values(array_filter($decodedLibur, function($ev) use ($ym) {
+    $events = array_values(array_filter($normalized, function($ev) use ($ym) {
       $date = $ev['event_date'] ?? '';
       return is_string($date) && substr($date, 0, 7) === $ym;
     }));
 
     if (empty($events)) {
-      $errorLibur = 'Data hari libur untuk bulan ini tidak ditemukan di 2026.json.';
+      $errorLibur = 'Data hari libur untuk bulan ini tidak ditemukan.';
     }
   }
 }
@@ -82,15 +150,80 @@ $hasUpcoming = !empty($todayEvents) || !empty($tickerEvents);
 $bmkgForecastFlat = [];
 $bmkgError        = '';
 
-$bmkgUrl  = "https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=35.10.16.1010";
-$bmkgJson = @file_get_contents($bmkgUrl);
+$bmkgUrl       = "https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=35.10.16.1010";
+$bmkgCacheDir  = __DIR__ . '/assets/cache';
+$bmkgCacheFile = $bmkgCacheDir . '/bmkg_forecast.json';
+$bmkgJson      = false;
+
+// Fetch BMKG dengan timeout + user-agent agar lebih kompatibel.
+$streamContext = stream_context_create([
+  'http' => [
+    'method'        => 'GET',
+    'timeout'       => 12,
+    'ignore_errors' => true,
+    'header'        => "Accept: application/json\r\nUser-Agent: Kalender-RSBL/1.0\r\n",
+  ],
+  // Banyak instalasi XAMPP gagal SSL verification karena CA bundle belum dikonfigurasi.
+  // Fallback ini dipakai agar data tetap bisa dimuat di environment lokal/internal.
+  'ssl' => [
+    'verify_peer'      => false,
+    'verify_peer_name' => false,
+  ],
+]);
+
+$bmkgJson = @file_get_contents($bmkgUrl, false, $streamContext);
+
+if ($bmkgJson === false && function_exists('curl_init')) {
+  $ch = curl_init($bmkgUrl);
+  if ($ch !== false) {
+    curl_setopt_array($ch, [
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_CONNECTTIMEOUT => 5,
+      CURLOPT_TIMEOUT        => 12,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTPHEADER     => [
+        'Accept: application/json',
+        'User-Agent: Kalender-RSBL/1.0',
+      ],
+      CURLOPT_SSL_VERIFYPEER => false,
+      CURLOPT_SSL_VERIFYHOST => 0,
+    ]);
+    $curlRes = curl_exec($ch);
+    if (is_string($curlRes) && $curlRes !== '') {
+      $bmkgJson = $curlRes;
+    }
+    curl_close($ch);
+  }
+}
 
 if ($bmkgJson === false) {
-  $bmkgError = 'Gagal memuat data cuaca BMKG.';
+  // Jika API gagal, pakai cache terakhir yang valid.
+  if (is_readable($bmkgCacheFile)) {
+    $cached = @file_get_contents($bmkgCacheFile);
+    $cachedDecoded = json_decode((string)$cached, true);
+    if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
+      $bmkgForecastFlat = $cachedDecoded;
+    } else {
+      $bmkgError = 'Gagal memuat data cuaca BMKG.';
+    }
+  } else {
+    $bmkgError = 'Gagal memuat data cuaca BMKG.';
+  }
 } else {
   $bmkgDecoded = json_decode($bmkgJson, true);
   if (!is_array($bmkgDecoded)) {
-    $bmkgError = 'Format data cuaca BMKG tidak valid.';
+    // JSON invalid: fallback ke cache bila tersedia.
+    if (is_readable($bmkgCacheFile)) {
+      $cached = @file_get_contents($bmkgCacheFile);
+      $cachedDecoded = json_decode((string)$cached, true);
+      if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
+        $bmkgForecastFlat = $cachedDecoded;
+      } else {
+        $bmkgError = 'Format data cuaca BMKG tidak valid.';
+      }
+    } else {
+      $bmkgError = 'Format data cuaca BMKG tidak valid.';
+    }
   } else {
     if (isset($bmkgDecoded['data'][0]['cuaca']) && is_array($bmkgDecoded['data'][0]['cuaca'])) {
       foreach ($bmkgDecoded['data'][0]['cuaca'] as $daily) {
@@ -104,8 +237,30 @@ if ($bmkgJson === false) {
       usort($bmkgForecastFlat, function ($a, $b) {
         return strcmp($a['local_datetime'] ?? '', $b['local_datetime'] ?? '');
       });
+
+      // Simpan cache data terakhir yang valid.
+      if (!empty($bmkgForecastFlat)) {
+        if (!is_dir($bmkgCacheDir)) {
+          @mkdir($bmkgCacheDir, 0777, true);
+        }
+        @file_put_contents(
+          $bmkgCacheFile,
+          json_encode($bmkgForecastFlat, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+        );
+      }
     } else {
-      $bmkgError = 'Struktur data prakiraan BMKG tidak ditemukan.';
+      // Struktur berubah/tidak sesuai: fallback ke cache bila tersedia.
+      if (is_readable($bmkgCacheFile)) {
+        $cached = @file_get_contents($bmkgCacheFile);
+        $cachedDecoded = json_decode((string)$cached, true);
+        if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
+          $bmkgForecastFlat = $cachedDecoded;
+        } else {
+          $bmkgError = 'Struktur data prakiraan BMKG tidak ditemukan.';
+        }
+      } else {
+        $bmkgError = 'Struktur data prakiraan BMKG tidak ditemukan.';
+      }
     }
   }
 }
@@ -725,13 +880,13 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
           <div class="day-progress" id="dayProgress"></div>
 
           <div class="holiday-section">
-            <div class="holiday-title">HARI LIBUR &amp; HARI BESAR BULAN INI</div>
+            <div class="holiday-title">HARI LIBUR BULAN INI</div>
             <div class="holiday-source">Sumber: <?= htmlspecialchars($liburSource) ?></div>
 
             <?php if ($errorLibur): ?>
               <div class="holiday-error"><?= htmlspecialchars($errorLibur) ?></div>
             <?php elseif (!$hasUpcoming): ?>
-              <div class="holiday-empty">Tidak ada hari besar tersisa di bulan ini.</div>
+              <div class="holiday-empty">Tidak ada hari libur tersisa di bulan ini.</div>
             <?php else: ?>
 
               <?php if (!empty($todayEvents)): ?>

@@ -886,7 +886,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
             <?php if ($errorLibur): ?>
               <div class="holiday-error"><?= htmlspecialchars($errorLibur) ?></div>
             <?php elseif (!$hasUpcoming): ?>
-              <div class="holiday-empty">Tidak ada hari libur tersisa di bulan ini.</div>
+              <div class="holiday-empty">Tidak ada hari libur pada bulan ini.</div>
             <?php else: ?>
 
               <?php if (!empty($todayEvents)): ?>

@@ -97,3 +97,7 @@ Pull request sangat terbuka untuk:
 ## 📄 Lisensi
 
 Belum ditentukan. Tambahkan `LICENSE` jika ingin dipublikasikan sebagai open-source.
+
+## 👨‍💻 Dibuat Oleh
+
+Dibuat oleh **Agung Wicax** - **IT RSUD Blambangan Banyuwangi**.

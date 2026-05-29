@@ -6,7 +6,7 @@ Dashboard kalender digital berbasis **PHP + JavaScript** untuk menampilkan jam r
 
 - 🕒 **Jam digital real-time (WIB)** dengan update per detik.
 - 📅 **Tanggal Indonesia lengkap** + progres hari dalam tahun.
-- 🎌 **Hari libur nasional & cuti bersama** dari API `libur.deno.dev`.
+- 🎌 **Hari libur nasional & cuti bersama** dari API `app.opica.id`.
 - 🧩 **Fallback data libur** ke file lokal `2026.json` jika API gagal.
 - 🌦️ **Prakiraan cuaca BMKG** + cache lokal otomatis.
 - 🕌 **Jadwal sholat harian** (MyQuran, Banyuwangi).
@@ -59,7 +59,7 @@ Contoh:
 
 ## 🔌 Integrasi API
 
-- 🎌 Libur nasional: `https://libur.deno.dev/api?year=YYYY`
+- 🎌 Libur nasional: `https://app.opica.id/api-libur/api?year=YYYY`
 - 🌦️ BMKG cuaca: `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=35.10.16.1010`
 - 🕌 Jadwal sholat: `https://api.myquran.com/v2/sholat/jadwal/1602/YYYY/M/D`
 

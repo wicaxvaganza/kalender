@@ -13,15 +13,14 @@ $errorLibur   = '';
 $todayEvents  = [];
 $tickerEvents = [];
 $holidayEmptyMessage = '';
-$liburSource  = 'API libur.deno.dev';
+$liburSource  = 'API app.opica.id';
 $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 $isTvMode = isset($_GET['display']) && strtolower((string) $_GET['display']) === 'tv';
 
 // ==========================
-// 1) HARI LIBUR DARI API libur.deno.dev
+// 1) HARI LIBUR DARI API app.opica.id
 // ==========================
-$liburUrl  = "https://libur.deno.dev/api?year={$year}";
-$liburFile = __DIR__ . '/2026.json'; // fallback lokal jika API tidak bisa diakses
+$liburUrl  = "https://app.opica.id/api-libur/api?year={$year}";
 $rawLibur  = false;
 
 // Request API dengan timeout + user-agent.
@@ -63,36 +62,45 @@ if ($rawLibur === false && function_exists('curl_init')) {
 }
 
 if ($rawLibur === false) {
-  if (is_readable($liburFile)) {
-    $rawLibur = @file_get_contents($liburFile);
-    $liburSource = 'File 2026.json (fallback)';
-  } else {
-    $errorLibur = 'Gagal memuat data hari libur.';
-    $liburSource = 'Tidak tersedia';
-  }
+  $errorLibur = 'Gagal memuat data hari libur.';
+  $liburSource = 'Tidak tersedia';
 }
 
 if (!$errorLibur) {
   $decodedLibur = json_decode((string)$rawLibur, true);
 
-  if (!is_array($decodedLibur)) {
+  // API bisa mengembalikan array langsung atau object wrapper { data: [...] }.
+  $liburItems = [];
+  if (is_array($decodedLibur)) {
+    if (array_is_list($decodedLibur)) {
+      $liburItems = $decodedLibur;
+    } elseif (isset($decodedLibur['data']) && is_array($decodedLibur['data'])) {
+      $liburItems = $decodedLibur['data'];
+    }
+  }
+
+  if (empty($liburItems)) {
     $errorLibur = 'Format data hari libur tidak valid.';
     $liburSource = 'Tidak tersedia';
   } else {
     // dukung 2 format:
-    // 1) libur.deno.dev -> { date, name }
-    // 2) fallback file lama -> { event_date, event_name, is_national_holiday }
+    // 1) API Opica -> { holiday_date, description, holiday_type }
+    // 2) API lain -> { date, name } atau { event_date, event_name, is_national_holiday }
     $normalized = [];
-    foreach ($decodedLibur as $item) {
+    foreach ($liburItems as $item) {
       if (!is_array($item)) continue;
 
-      $date = $item['event_date'] ?? $item['date'] ?? '';
-      $name = $item['event_name'] ?? $item['name'] ?? 'Hari libur';
+      $date = $item['holiday_date'] ?? $item['event_date'] ?? $item['date'] ?? '';
+      $name = $item['description'] ?? $item['event_name'] ?? $item['name'] ?? 'Hari libur';
       if (!is_string($date) || $date === '') continue;
 
-      $isNational = isset($item['is_national_holiday'])
-        ? !empty($item['is_national_holiday'])
-        : (stripos((string)$name, 'cuti bersama') === false);
+      if (isset($item['holiday_type'])) {
+        $isNational = ((string)$item['holiday_type']) === 'libur_nasional';
+      } else {
+        $isNational = isset($item['is_national_holiday'])
+          ? !empty($item['is_national_holiday'])
+          : (stripos((string)$name, 'cuti bersama') === false);
+      }
 
       $normalized[] = [
         'event_date'          => $date,

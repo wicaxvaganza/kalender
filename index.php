@@ -61,63 +61,59 @@ if ($rawLibur === false && function_exists('curl_init')) {
   }
 }
 
-if ($rawLibur === false) {
-  $errorLibur = 'Gagal memuat data hari libur.';
-  $liburSource = 'Tidak tersedia';
+// API bisa mengembalikan array langsung atau object wrapper { data: [...] }.
+$liburItems = [];
+if ($rawLibur !== false) {
+  $liburItems = json_decode((string)$rawLibur, true);
+  if (is_array($liburItems)) {
+    if (!array_is_list($liburItems) && isset($liburItems['data']) && is_array($liburItems['data'])) {
+      $liburItems = $liburItems['data'];
+    } elseif (!array_is_list($liburItems)) {
+      $liburItems = [];
+    }
+  } else {
+    $liburItems = [];
+  }
 }
 
-if (!$errorLibur) {
-  $decodedLibur = json_decode((string)$rawLibur, true);
+if (empty($liburItems)) {
+  $errorLibur = 'Gagal memuat data hari libur dari API.';
+  $liburSource = 'Tidak tersedia';
+} else {
+  // dukung 2 format:
+  // 1) API Opica -> { holiday_date, description, holiday_type }
+  // 2) API lain -> { date, name } atau { event_date, event_name, is_national_holiday }
+  $normalized = [];
+  foreach ($liburItems as $item) {
+    if (!is_array($item)) continue;
 
-  // API bisa mengembalikan array langsung atau object wrapper { data: [...] }.
-  $liburItems = [];
-  if (is_array($decodedLibur)) {
-    if (array_is_list($decodedLibur)) {
-      $liburItems = $decodedLibur;
-    } elseif (isset($decodedLibur['data']) && is_array($decodedLibur['data'])) {
-      $liburItems = $decodedLibur['data'];
+    $date = $item['holiday_date'] ?? $item['event_date'] ?? $item['date'] ?? '';
+    $name = $item['description'] ?? $item['event_name'] ?? $item['name'] ?? 'Hari libur';
+    if (!is_string($date) || $date === '') continue;
+
+    if (isset($item['holiday_type'])) {
+      $isNational = ((string)$item['holiday_type']) === 'libur_nasional';
+    } else {
+      $isNational = isset($item['is_national_holiday'])
+        ? !empty($item['is_national_holiday'])
+        : (stripos((string)$name, 'cuti bersama') === false);
     }
+
+    $normalized[] = [
+      'event_date'          => $date,
+      'event_name'          => $name,
+      'is_national_holiday' => $isNational,
+    ];
   }
 
-  if (empty($liburItems)) {
-    $errorLibur = 'Format data hari libur tidak valid.';
-    $liburSource = 'Tidak tersedia';
-  } else {
-    // dukung 2 format:
-    // 1) API Opica -> { holiday_date, description, holiday_type }
-    // 2) API lain -> { date, name } atau { event_date, event_name, is_national_holiday }
-    $normalized = [];
-    foreach ($liburItems as $item) {
-      if (!is_array($item)) continue;
+  $ym = sprintf('%04d-%02d', $year, $month);
+  $events = array_values(array_filter($normalized, function($ev) use ($ym) {
+    $date = $ev['event_date'] ?? '';
+    return is_string($date) && substr($date, 0, 7) === $ym;
+  }));
 
-      $date = $item['holiday_date'] ?? $item['event_date'] ?? $item['date'] ?? '';
-      $name = $item['description'] ?? $item['event_name'] ?? $item['name'] ?? 'Hari libur';
-      if (!is_string($date) || $date === '') continue;
-
-      if (isset($item['holiday_type'])) {
-        $isNational = ((string)$item['holiday_type']) === 'libur_nasional';
-      } else {
-        $isNational = isset($item['is_national_holiday'])
-          ? !empty($item['is_national_holiday'])
-          : (stripos((string)$name, 'cuti bersama') === false);
-      }
-
-      $normalized[] = [
-        'event_date'          => $date,
-        'event_name'          => $name,
-        'is_national_holiday' => $isNational,
-      ];
-    }
-
-    $ym = sprintf('%04d-%02d', $year, $month);
-    $events = array_values(array_filter($normalized, function($ev) use ($ym) {
-      $date = $ev['event_date'] ?? '';
-      return is_string($date) && substr($date, 0, 7) === $ym;
-    }));
-
-    if (empty($events)) {
-      $holidayEmptyMessage = 'Tidak ada hari libur pada bulan ini.';
-    }
+  if (empty($events)) {
+    $holidayEmptyMessage = 'Tidak ada hari libur pada bulan ini.';
   }
 }
 

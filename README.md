@@ -7,7 +7,6 @@ Dashboard kalender digital berbasis **PHP + JavaScript** untuk menampilkan jam r
 - 🕒 **Jam digital real-time (WIB)** dengan update per detik.
 - 📅 **Tanggal Indonesia lengkap** + progres hari dalam tahun.
 - 🎌 **Hari libur nasional & cuti bersama** dari API `app.opica.id`.
-- 🧩 **Fallback data libur** ke file lokal `2026.json` jika API gagal.
 - 🌦️ **Prakiraan cuaca BMKG** + cache lokal otomatis.
 - 🕌 **Jadwal sholat harian** (MyQuran, Banyuwangi).
 - 📺 **Mode TV display** untuk layar besar (`?display=tv`).
@@ -25,7 +24,6 @@ Dashboard kalender digital berbasis **PHP + JavaScript** untuk menampilkan jam r
 ```text
 kalender/
 ├── index.php
-├── 2026.json
 ├── .gitignore
 └── assets/
     ├── rsbl.jpeg
@@ -65,7 +63,7 @@ Contoh:
 
 ## 🛡️ Mekanisme Fallback
 
-- Jika API libur gagal, aplikasi membaca `2026.json`.
+- Jika API libur gagal, aplikasi menampilkan pesan error data hari libur tidak tersedia.
 - Jika API BMKG gagal/invalid, aplikasi memakai cache terakhir valid:
   - `assets/cache/bmkg_forecast.json`
 

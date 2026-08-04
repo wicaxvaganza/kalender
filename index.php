@@ -17,6 +17,135 @@ $liburSource  = 'API app.opica.id';
 $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 $isTvMode = isset($_GET['display']) && strtolower((string) $_GET['display']) === 'tv';
 
+function loadBmkgForecastData(): array {
+  $bmkgForecastFlat = [];
+  $bmkgError        = '';
+
+  $bmkgUrl       = "https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=35.10.16.1010";
+  $bmkgCacheDir  = __DIR__ . '/assets/cache';
+  $bmkgCacheFile = $bmkgCacheDir . '/bmkg_forecast.json';
+  $bmkgJson      = false;
+
+  $streamContext = stream_context_create([
+    'http' => [
+      'method'        => 'GET',
+      'timeout'       => 12,
+      'ignore_errors' => true,
+      'header'        => "Accept: application/json\r\nUser-Agent: Kalender-RSBL/1.0\r\n",
+    ],
+    'ssl' => [
+      'verify_peer'      => false,
+      'verify_peer_name' => false,
+    ],
+  ]);
+
+  $bmkgJson = @file_get_contents($bmkgUrl, false, $streamContext);
+
+  if ($bmkgJson === false && function_exists('curl_init')) {
+    $ch = curl_init($bmkgUrl);
+    if ($ch !== false) {
+      curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT        => 12,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTPHEADER     => [
+          'Accept: application/json',
+          'User-Agent: Kalender-RSBL/1.0',
+        ],
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => 0,
+      ]);
+      $curlRes = curl_exec($ch);
+      if (is_string($curlRes) && $curlRes !== '') {
+        $bmkgJson = $curlRes;
+      }
+      curl_close($ch);
+    }
+  }
+
+  if ($bmkgJson === false) {
+    if (is_readable($bmkgCacheFile)) {
+      $cached = @file_get_contents($bmkgCacheFile);
+      $cachedDecoded = json_decode((string)$cached, true);
+      if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
+        $bmkgForecastFlat = $cachedDecoded;
+      } else {
+        $bmkgError = 'Gagal memuat data cuaca BMKG.';
+      }
+    } else {
+      $bmkgError = 'Gagal memuat data cuaca BMKG.';
+    }
+
+    return [$bmkgForecastFlat, $bmkgError];
+  }
+
+  $bmkgDecoded = json_decode($bmkgJson, true);
+  if (!is_array($bmkgDecoded)) {
+    if (is_readable($bmkgCacheFile)) {
+      $cached = @file_get_contents($bmkgCacheFile);
+      $cachedDecoded = json_decode((string)$cached, true);
+      if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
+        $bmkgForecastFlat = $cachedDecoded;
+      } else {
+        $bmkgError = 'Format data cuaca BMKG tidak valid.';
+      }
+    } else {
+      $bmkgError = 'Format data cuaca BMKG tidak valid.';
+    }
+
+    return [$bmkgForecastFlat, $bmkgError];
+  }
+
+  if (isset($bmkgDecoded['data'][0]['cuaca']) && is_array($bmkgDecoded['data'][0]['cuaca'])) {
+    foreach ($bmkgDecoded['data'][0]['cuaca'] as $daily) {
+      if (!is_array($daily)) continue;
+      foreach ($daily as $item) {
+        if (is_array($item)) {
+          $bmkgForecastFlat[] = $item;
+        }
+      }
+    }
+    usort($bmkgForecastFlat, function ($a, $b) {
+      return strcmp($a['local_datetime'] ?? '', $b['local_datetime'] ?? '');
+    });
+
+    if (!empty($bmkgForecastFlat)) {
+      if (!is_dir($bmkgCacheDir)) {
+        @mkdir($bmkgCacheDir, 0777, true);
+      }
+      @file_put_contents(
+        $bmkgCacheFile,
+        json_encode($bmkgForecastFlat, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+      );
+    }
+  } else {
+    if (is_readable($bmkgCacheFile)) {
+      $cached = @file_get_contents($bmkgCacheFile);
+      $cachedDecoded = json_decode((string)$cached, true);
+      if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
+        $bmkgForecastFlat = $cachedDecoded;
+      } else {
+        $bmkgError = 'Struktur data prakiraan BMKG tidak ditemukan.';
+      }
+    } else {
+      $bmkgError = 'Struktur data prakiraan BMKG tidak ditemukan.';
+    }
+  }
+
+  return [$bmkgForecastFlat, $bmkgError];
+}
+
+if (isset($_GET['bmkg']) && (string)$_GET['bmkg'] === '1') {
+  [$bmkgForecastFlat, $bmkgError] = loadBmkgForecastData();
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode([
+    'forecast' => $bmkgForecastFlat,
+    'error'    => $bmkgError,
+  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  exit;
+}
+
 // ==========================
 // 1) HARI LIBUR DARI API app.opica.id
 // ==========================
@@ -141,7 +270,7 @@ if (!$errorLibur && !empty($events)) {
 // siapkan data untuk JS ticker
 $tickerEventsJs = [];
 foreach ($tickerEvents as $ev) {
-  $tickerEventsJs[] = [
+$tickerEventsJs[] = [
     'event_date'          => $ev['event_date'] ?? '',
     'event_name'          => $ev['event_name'] ?? 'Hari besar',
     'is_national_holiday' => !empty($ev['is_national_holiday']),
@@ -152,126 +281,23 @@ if (!$errorLibur && !$hasUpcoming && empty($holidayEmptyMessage)) {
   $holidayEmptyMessage = 'Tidak ada hari libur tersisa di bulan ini.';
 }
 
+if (isset($_GET['libur']) && (string)$_GET['libur'] === '1') {
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode([
+    'error'              => $errorLibur,
+    'holidayEmptyMessage'=> $holidayEmptyMessage,
+    'todayEvents'        => $todayEvents,
+    'tickerEvents'       => $tickerEventsJs,
+    'hasUpcoming'        => $hasUpcoming,
+    'source'             => $liburSource,
+  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  exit;
+}
+
 // ==========================
 // 2) API BMKG PRAKIRAAN CUACA (adm4 = 35.10.16.1010)
 // ==========================
-$bmkgForecastFlat = [];
-$bmkgError        = '';
-
-$bmkgUrl       = "https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=35.10.16.1010";
-$bmkgCacheDir  = __DIR__ . '/assets/cache';
-$bmkgCacheFile = $bmkgCacheDir . '/bmkg_forecast.json';
-$bmkgJson      = false;
-
-// Fetch BMKG dengan timeout + user-agent agar lebih kompatibel.
-$streamContext = stream_context_create([
-  'http' => [
-    'method'        => 'GET',
-    'timeout'       => 12,
-    'ignore_errors' => true,
-    'header'        => "Accept: application/json\r\nUser-Agent: Kalender-RSBL/1.0\r\n",
-  ],
-  // Banyak instalasi XAMPP gagal SSL verification karena CA bundle belum dikonfigurasi.
-  // Fallback ini dipakai agar data tetap bisa dimuat di environment lokal/internal.
-  'ssl' => [
-    'verify_peer'      => false,
-    'verify_peer_name' => false,
-  ],
-]);
-
-$bmkgJson = @file_get_contents($bmkgUrl, false, $streamContext);
-
-if ($bmkgJson === false && function_exists('curl_init')) {
-  $ch = curl_init($bmkgUrl);
-  if ($ch !== false) {
-    curl_setopt_array($ch, [
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_CONNECTTIMEOUT => 5,
-      CURLOPT_TIMEOUT        => 12,
-      CURLOPT_FOLLOWLOCATION => true,
-      CURLOPT_HTTPHEADER     => [
-        'Accept: application/json',
-        'User-Agent: Kalender-RSBL/1.0',
-      ],
-      CURLOPT_SSL_VERIFYPEER => false,
-      CURLOPT_SSL_VERIFYHOST => 0,
-    ]);
-    $curlRes = curl_exec($ch);
-    if (is_string($curlRes) && $curlRes !== '') {
-      $bmkgJson = $curlRes;
-    }
-    curl_close($ch);
-  }
-}
-
-if ($bmkgJson === false) {
-  // Jika API gagal, pakai cache terakhir yang valid.
-  if (is_readable($bmkgCacheFile)) {
-    $cached = @file_get_contents($bmkgCacheFile);
-    $cachedDecoded = json_decode((string)$cached, true);
-    if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
-      $bmkgForecastFlat = $cachedDecoded;
-    } else {
-      $bmkgError = 'Gagal memuat data cuaca BMKG.';
-    }
-  } else {
-    $bmkgError = 'Gagal memuat data cuaca BMKG.';
-  }
-} else {
-  $bmkgDecoded = json_decode($bmkgJson, true);
-  if (!is_array($bmkgDecoded)) {
-    // JSON invalid: fallback ke cache bila tersedia.
-    if (is_readable($bmkgCacheFile)) {
-      $cached = @file_get_contents($bmkgCacheFile);
-      $cachedDecoded = json_decode((string)$cached, true);
-      if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
-        $bmkgForecastFlat = $cachedDecoded;
-      } else {
-        $bmkgError = 'Format data cuaca BMKG tidak valid.';
-      }
-    } else {
-      $bmkgError = 'Format data cuaca BMKG tidak valid.';
-    }
-  } else {
-    if (isset($bmkgDecoded['data'][0]['cuaca']) && is_array($bmkgDecoded['data'][0]['cuaca'])) {
-      foreach ($bmkgDecoded['data'][0]['cuaca'] as $daily) {
-        if (!is_array($daily)) continue;
-        foreach ($daily as $item) {
-          if (is_array($item)) {
-            $bmkgForecastFlat[] = $item;
-          }
-        }
-      }
-      usort($bmkgForecastFlat, function ($a, $b) {
-        return strcmp($a['local_datetime'] ?? '', $b['local_datetime'] ?? '');
-      });
-
-      // Simpan cache data terakhir yang valid.
-      if (!empty($bmkgForecastFlat)) {
-        if (!is_dir($bmkgCacheDir)) {
-          @mkdir($bmkgCacheDir, 0777, true);
-        }
-        @file_put_contents(
-          $bmkgCacheFile,
-          json_encode($bmkgForecastFlat, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-        );
-      }
-    } else {
-      // Struktur berubah/tidak sesuai: fallback ke cache bila tersedia.
-      if (is_readable($bmkgCacheFile)) {
-        $cached = @file_get_contents($bmkgCacheFile);
-        $cachedDecoded = json_decode((string)$cached, true);
-        if (is_array($cachedDecoded) && !empty($cachedDecoded)) {
-          $bmkgForecastFlat = $cachedDecoded;
-        } else {
-          $bmkgError = 'Struktur data prakiraan BMKG tidak ditemukan.';
-        }
-      } else {
-        $bmkgError = 'Struktur data prakiraan BMKG tidak ditemukan.';
-      }
-    }
-  }
-}
+[$bmkgForecastFlat, $bmkgError] = loadBmkgForecastData();
 
 // ==========================
 // BACKGROUND FILE (cache-busting)
@@ -887,32 +913,30 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
           <div class="date-main" id="dateMain"></div>
           <div class="day-progress" id="dayProgress"></div>
 
-          <div class="holiday-section">
+          <div class="holiday-section" id="holidaySection">
             <div class="holiday-title">HARI LIBUR BULAN INI</div>
-
-            <?php if ($errorLibur): ?>
-              <div class="holiday-error"><?= htmlspecialchars($errorLibur) ?></div>
-            <?php elseif (!$hasUpcoming): ?>
-              <div class="holiday-empty"><?= htmlspecialchars($holidayEmptyMessage) ?></div>
-            <?php else: ?>
-
-              <?php if (!empty($todayEvents)): ?>
-                <div class="today-event-section">
-                  <?php foreach ($todayEvents as $item): ?>
-                    <div class="today-event-item">
-                      <?= htmlspecialchars($item['event_name'] ?? 'Hari besar') ?>
-                    </div>
-                  <?php endforeach; ?>
-                </div>
+            <div class="holiday-source" id="holidaySource">Sumber: <?= htmlspecialchars($liburSource) ?></div>
+            <div class="holiday-status" id="holidayStatus">
+              <?php if ($errorLibur): ?>
+                <div class="holiday-error"><?= htmlspecialchars($errorLibur) ?></div>
+              <?php elseif (!$hasUpcoming): ?>
+                <div class="holiday-empty"><?= htmlspecialchars($holidayEmptyMessage) ?></div>
               <?php endif; ?>
+            </div>
 
-              <div class="ticker-section" id="tickerSection" <?php if (empty($tickerEvents)) echo 'style="display:none"'; ?>>
-                <div class="ticker-wrapper">
-                  <div class="ticker-item" id="tickerItem"></div>
+            <div class="today-event-section" id="todayEventSection" <?php if (empty($todayEvents) || $errorLibur || !$hasUpcoming) echo 'style="display:none"'; ?>>
+              <?php foreach ($todayEvents as $item): ?>
+                <div class="today-event-item">
+                  <?= htmlspecialchars($item['event_name'] ?? 'Hari besar') ?>
                 </div>
-              </div>
+              <?php endforeach; ?>
+            </div>
 
-            <?php endif; ?>
+            <div class="ticker-section" id="tickerSection" <?php if (empty($tickerEvents) || $errorLibur || !$hasUpcoming) echo 'style="display:none"'; ?>>
+              <div class="ticker-wrapper">
+                <div class="ticker-item" id="tickerItem"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1189,8 +1213,32 @@ function resetAutoHideTimer(){
 // ==========================
 // TICKER HARI LIBUR (dari PHP)
 // ==========================
-const tickerEvents = <?php echo json_encode($tickerEventsJs, JSON_UNESCAPED_UNICODE); ?> || [];
+const holidaySectionEl    = document.getElementById('holidaySection');
+const holidaySourceEl     = document.getElementById('holidaySource');
+const holidayStatusEl     = document.getElementById('holidayStatus');
+const todayEventSectionEl  = document.getElementById('todayEventSection');
+
+let holidayError = <?php echo json_encode($errorLibur, JSON_UNESCAPED_UNICODE); ?> || "";
+let holidayEmptyMessage = <?php echo json_encode($holidayEmptyMessage, JSON_UNESCAPED_UNICODE); ?> || "";
+let holidaySource = <?php echo json_encode($liburSource, JSON_UNESCAPED_UNICODE); ?> || "API app.opica.id";
+let holidayTodayEvents = <?php echo json_encode($todayEvents, JSON_UNESCAPED_UNICODE); ?> || [];
+let tickerEvents = <?php echo json_encode($tickerEventsJs, JSON_UNESCAPED_UNICODE); ?> || [];
+let holidayHasUpcoming = <?php echo json_encode($hasUpcoming, JSON_UNESCAPED_UNICODE); ?> || false;
+const liburRefreshUrl = new URL(window.location.href);
+liburRefreshUrl.searchParams.delete('bmkg');
+liburRefreshUrl.searchParams.delete('libur');
+liburRefreshUrl.searchParams.set('libur', '1');
+
 let tickerBaseIndex = 0;
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function updateTicker() {
   if (!tickerEvents.length || !tickerItem) return;
@@ -1226,11 +1274,105 @@ function updateTicker() {
   tickerBaseIndex = (tickerBaseIndex + 1) % len;
 }
 
+function renderHolidaySection() {
+  if (holidaySourceEl) {
+    holidaySourceEl.textContent = `Sumber: ${holidaySource || 'Tidak tersedia'}`;
+  }
+
+  if (holidayStatusEl) {
+    if (holidayError) {
+      holidayStatusEl.innerHTML = `<div class="holiday-error">${escapeHtml(holidayError)}</div>`;
+    } else if (!holidayHasUpcoming) {
+      holidayStatusEl.innerHTML = `<div class="holiday-empty">${escapeHtml(holidayEmptyMessage || 'Tidak ada hari libur pada bulan ini.')}</div>`;
+    } else {
+      holidayStatusEl.innerHTML = '';
+    }
+  }
+
+  if (todayEventSectionEl) {
+    if (holidayError || !holidayHasUpcoming || !holidayTodayEvents.length) {
+      todayEventSectionEl.style.display = 'none';
+      todayEventSectionEl.innerHTML = '';
+    } else {
+      todayEventSectionEl.style.display = 'block';
+      todayEventSectionEl.innerHTML = holidayTodayEvents
+        .map((item) => `<div class="today-event-item">${escapeHtml(item.event_name || 'Hari besar')}</div>`)
+        .join('');
+    }
+  }
+
+  if (tickerSection) {
+    if (holidayError || !holidayHasUpcoming || !tickerEvents.length) {
+      tickerSection.style.display = 'none';
+      tickerItem.innerHTML = '';
+      return;
+    }
+
+    tickerSection.style.display = 'block';
+    tickerBaseIndex = 0;
+    updateTicker();
+  }
+}
+
+async function fetchHolidayData() {
+  try {
+    const res = await fetch(liburRefreshUrl.toString(), { cache: 'no-store' });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+    if (!data || !Array.isArray(data.tickerEvents) || !Array.isArray(data.todayEvents)) {
+      throw new Error("Format data libur tidak valid");
+    }
+
+    holidayError = data.error || "";
+    holidayEmptyMessage = data.holidayEmptyMessage || "";
+    holidaySource = data.source || "API app.opica.id";
+    holidayTodayEvents = data.todayEvents;
+    tickerEvents = data.tickerEvents;
+    holidayHasUpcoming = !!data.hasUpcoming;
+    renderHolidaySection();
+  } catch (err) {
+    console.error("Gagal memuat ulang data hari libur:", err);
+    if (!holidayTodayEvents.length && !tickerEvents.length) {
+      holidayError = "Gagal memuat data hari libur dari API.";
+      holidaySource = "Tidak tersedia";
+      holidayHasUpcoming = false;
+      renderHolidaySection();
+    }
+  }
+}
+
 // ==========================
 // BMKG DATA DARI PHP
 // ==========================
-const bmkgForecast = <?php echo json_encode($bmkgForecastFlat, JSON_UNESCAPED_UNICODE); ?> || [];
-const bmkgError    = <?php echo json_encode($bmkgError, JSON_UNESCAPED_UNICODE); ?> || "";
+let bmkgForecast = <?php echo json_encode($bmkgForecastFlat, JSON_UNESCAPED_UNICODE); ?> || [];
+let bmkgError    = <?php echo json_encode($bmkgError, JSON_UNESCAPED_UNICODE); ?> || "";
+const bmkgRefreshUrl = new URL(window.location.href);
+bmkgRefreshUrl.searchParams.delete('bmkg');
+bmkgRefreshUrl.searchParams.delete('libur');
+bmkgRefreshUrl.searchParams.set('bmkg', '1');
+
+async function fetchBmkgWeather() {
+  try {
+    const res = await fetch(bmkgRefreshUrl.toString(), { cache: 'no-store' });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+    if (!data || !Array.isArray(data.forecast)) {
+      throw new Error("Format data BMKG tidak valid");
+    }
+
+    bmkgForecast = data.forecast;
+    bmkgError = data.error || "";
+    renderBMKGWeather();
+  } catch (err) {
+    console.error("Gagal memuat ulang data cuaca BMKG:", err);
+    if (!bmkgForecast.length) {
+      bmkgError = "Gagal memuat data cuaca BMKG.";
+      renderBMKGWeather();
+    }
+  }
+}
 
 // parsing "YYYY-MM-DD HH:mm:ss" -> Date (anggap WIB, tambahkan +07:00)
 function parseLocalDatetime(str) {
@@ -1451,14 +1593,14 @@ adjustOverlayByBackground();
 updateClock();
 setInterval(updateClock, 200);
 
+renderHolidaySection();
+setInterval(fetchHolidayData, 6 * 60 * 60 * 1000);
 if (tickerEvents.length && tickerSection) {
-  tickerSection.style.display = 'block';
-  updateTicker();
   setInterval(updateTicker, 4000);
 }
 
 renderBMKGWeather();
-setInterval(renderBMKGWeather, 10 * 60 * 1000);
+setInterval(fetchBmkgWeather, 10 * 60 * 1000);
 
 fetchJadwalSholat();
 setInterval(updatePrayerList, 60 * 1000);

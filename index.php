@@ -576,7 +576,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     animation: teamAllReveal 30s ease-in-out 12s infinite;
   }
   .team-message {
-    font-size: clamp(21px, 1.75vw, 34px);
+    font-size: clamp(30px, 2.55vw, 50px);
     letter-spacing: .09em;
     animation: teamMessageReveal 30s cubic-bezier(.22,.61,.36,1) infinite;
   }
@@ -587,7 +587,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     max-width: 1100px;
     padding-inline: 12px;
     font-family: 'Inter', sans-serif;
-    font-size: clamp(15px, 1.25vw, 24px);
+    font-size: clamp(23px, 1.85vw, 36px);
     letter-spacing: .04em;
     text-transform: none;
     animation-delay: 23s;
@@ -1072,6 +1072,8 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     .team-intro { top: -52px; left: 12px; right: 12px; }
     .team-name { font-size: clamp(20px, 6vw, 30px); }
     .team-all { font-size: clamp(10px, 2.8vw, 15px); }
+    .team-message { font-size: clamp(17px, 4.8vw, 24px); }
+    .team-message.service-motto { font-size: clamp(11px, 3.2vw, 16px); }
   }
 
   @media (max-height: 860px) {

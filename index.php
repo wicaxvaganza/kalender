@@ -808,19 +808,20 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
      aktif via ?display=tv
      ========================= */
   body.display-tv .wrapper{
-    padding: 2.2vh 2.2vw;
+    padding: 0 1vw;
   }
   body.display-tv .clock-card{
     max-width: none;
-    height: 100%;
-    border-radius: 28px;
-    padding: clamp(20px, 2.8vh, 36px) clamp(24px, 2.8vw, 42px) clamp(24px, 3vh, 40px);
+    width: 100%;
+    height: 106vh;
+    border-radius: 24px;
+    padding: clamp(16px, 2vh, 28px) clamp(18px, 2vw, 34px);
   }
   body.display-tv .clock-card::before{
-    border-radius: 28px;
+    border-radius: 24px;
   }
   body.display-tv .dashboard-grid{
-    grid-template-columns: 1fr 2.8fr 1fr;
+    grid-template-columns: .95fr 2.8fr .95fr;
     grid-template-areas: "left center right";
     gap: clamp(16px, 1.8vw, 30px);
     height: 100%;
@@ -833,29 +834,36 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     align-self: stretch;
   }
   body.display-tv .time-display{
-    font-size: clamp(76px, 8.8vw, 160px);
+    font-size: clamp(84px, 9.6vw, 172px);
     line-height: .92;
   }
   body.display-tv .date-main{
-    font-size: clamp(34px, 2.4vw, 52px);
+    font-size: clamp(38px, 2.7vw, 58px);
   }
   body.display-tv .day-progress{
     font-size: clamp(20px, 1.3vw, 30px);
   }
   body.display-tv .holiday-title{
-    font-size: clamp(24px, 1.7vw, 38px);
+    font-size: clamp(27px, 1.9vw, 40px);
   }
-  body.display-tv .holiday-source,
   body.display-tv .today-event-item,
   body.display-tv .ticker-row,
   body.display-tv .weather-temp,
   body.display-tv .weather-desc,
   body.display-tv .prayer-row{
-    font-size: clamp(18px, 1.1vw, 26px);
+    font-size: clamp(21px, 1.25vw, 28px);
+  }
+  body.display-tv .holiday-source{
+    font-size: clamp(14px, .85vw, 18px);
   }
   body.display-tv .weather-city,
   body.display-tv .prayer-title{
-    font-size: clamp(15px, .9vw, 20px);
+    font-size: clamp(18px, 1vw, 22px);
+  }
+  body.display-tv .weather-updated,
+  body.display-tv .weather-next-hour,
+  body.display-tv .prayer-badge-small{
+    font-size: clamp(13px, .75vw, 17px);
   }
   body.display-tv .ticker-wrapper{
     height: clamp(80px, 11vh, 120px);

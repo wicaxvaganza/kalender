@@ -537,7 +537,8 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     height: 42px;
   }
   .team-name,
-  .team-all {
+  .team-all,
+  .team-message {
     position: absolute;
     inset: 0;
     display: flex;
@@ -566,32 +567,57 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     text-shadow: 0 2px 10px rgba(127,29,29,.72);
   }
   .team-name {
-    animation: teamNameReveal 20s ease-in-out infinite;
+    animation: teamNameReveal 30s ease-in-out infinite;
     animation-delay: var(--delay);
   }
   .team-all {
     font-size: clamp(16px, 1.35vw, 25px);
     letter-spacing: .07em;
-    animation: teamAllReveal 20s ease-in-out 12s infinite;
+    animation: teamAllReveal 30s ease-in-out 12s infinite;
+  }
+  .team-message {
+    font-size: clamp(21px, 1.75vw, 34px);
+    letter-spacing: .09em;
+    animation: teamMessageReveal 30s cubic-bezier(.22,.61,.36,1) infinite;
+  }
+  .team-message.hospital-name {
+    animation-delay: 18s;
+  }
+  .team-message.service-motto {
+    max-width: 1100px;
+    padding-inline: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(15px, 1.25vw, 24px);
+    letter-spacing: .04em;
+    text-transform: none;
+    animation-delay: 23s;
   }
   @keyframes teamNameReveal {
     0% { opacity: 0; transform: translateY(18px) rotate(-8deg) scale(.72); filter: blur(3px); }
-    2% { opacity: 1; transform: translateY(-4px) rotate(5deg) scale(1.08); filter: blur(0); }
-    4% { opacity: 1; transform: translateY(1px) rotate(-3deg) scale(.98); }
-    6% { opacity: 1; transform: translateY(-3px) rotate(2deg) scale(1.04); }
-    8% { opacity: 1; transform: translateY(0) rotate(0) scale(1); filter: blur(0); }
-    10%, 100% { opacity: 0; transform: translateY(-16px) rotate(7deg) scale(.80); filter: blur(3px); }
+    1% { opacity: 1; transform: translateY(-4px) rotate(5deg) scale(1.08); filter: blur(0); }
+    2.5% { opacity: 1; transform: translateY(1px) rotate(-3deg) scale(.98); }
+    4% { opacity: 1; transform: translateY(-3px) rotate(2deg) scale(1.04); }
+    5.5% { opacity: 1; transform: translateY(0) rotate(0) scale(1); filter: blur(0); }
+    6.7%, 100% { opacity: 0; transform: translateY(-16px) rotate(7deg) scale(.80); filter: blur(3px); }
   }
   @keyframes teamAllReveal {
     0% { opacity: 0; transform: translateY(12px) scale(.85); filter: blur(3px); }
-    3% { opacity: 1; transform: translateY(-5px) scale(1.04); filter: blur(0); }
-    7%, 30% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-    34% { opacity: 1; transform: translateY(-4px) scale(1.02); }
-    38%, 100% { opacity: 0; transform: translateY(-14px) scale(.88); filter: blur(3px); }
+    1.5% { opacity: 1; transform: translateY(-5px) scale(1.04); filter: blur(0); }
+    3%, 13% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    15% { opacity: 0; transform: translateY(-14px) scale(.88); filter: blur(3px); }
+    100% { opacity: 0; }
+  }
+  @keyframes teamMessageReveal {
+    0% { opacity: 0; transform: translateX(-40px) skewX(-8deg) scale(.94); filter: blur(4px); }
+    2% { opacity: 1; transform: translateX(8px) skewX(2deg) scale(1.04); filter: blur(0); }
+    4%, 13% { opacity: 1; transform: translateX(0) skewX(0) scale(1); filter: blur(0); }
+    15% { opacity: 0; transform: translateX(40px) skewX(8deg) scale(.94); filter: blur(4px); }
+    100% { opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .team-name { display: none; animation: none; }
     .team-all { opacity: 1; animation: none; }
+    .team-message { display: none; animation: none; }
   }
 
   .dashboard-grid {
@@ -1068,6 +1094,8 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
         <span class="team-name" style="--delay:8s">Bimo</span>
         <span class="team-name" style="--delay:10s">Farhan</span>
         <span class="team-all">Nanang · Agung · Fandy · Udin · Bimo · Farhan</span>
+        <span class="team-message hospital-name">RSUD Blambangan Banyuwangi</span>
+        <span class="team-message service-motto">Pelayanan Hari Ini Harus Lebih Baik dari Hari Kemarin</span>
       </span>
     </div>
     <div class="dashboard-grid">

@@ -553,6 +553,18 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     -webkit-text-stroke: 1px rgba(80,0,0,.72);
     text-shadow: 0 3px 0 #991b1b, 0 7px 18px rgba(0,0,0,.48);
   }
+  .team-name::before,
+  .team-all::before {
+    content: "TIM IT RSBL  •";
+    margin-right: 12px;
+    color: #fee2e2;
+    font-family: 'Inter', sans-serif;
+    font-size: .58em;
+    font-weight: 900;
+    letter-spacing: .12em;
+    -webkit-text-stroke: 0;
+    text-shadow: 0 2px 10px rgba(127,29,29,.72);
+  }
   .team-name {
     animation: teamNameReveal 20s ease-in-out infinite;
     animation-delay: var(--delay);

@@ -7,6 +7,8 @@ $now      = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
 $year     = (int) $now->format('Y');
 $month    = (int) $now->format('n'); // 1-12
 $todayStr = $now->format('Y-m-d');
+$isIndependenceTheme = $month === 8;
+$independenceAnniversary = $year - 1945;
 
 $events       = [];
 $errorLibur   = '';
@@ -440,6 +442,78 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     );
   }
   .clock-card > * { position: relative; z-index: 1; }
+
+  /* Tema Kemerdekaan: aktif otomatis selama Agustus. */
+  body.independence-theme .clock-card {
+    border-color: rgba(255,255,255,.42);
+    box-shadow:
+      0 24px 80px rgba(0,0,0,.34),
+      -12px 0 44px rgba(220,38,38,.16),
+      12px 0 44px rgba(255,255,255,.10);
+  }
+  body.independence-theme .clock-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 28px;
+    right: 28px;
+    height: 5px;
+    border-radius: 0 0 999px 999px;
+    background: linear-gradient(90deg, #dc2626 0 50%, #fff 50% 100%);
+    box-shadow: 0 2px 18px rgba(220,38,38,.28);
+    pointer-events: none;
+    z-index: 2;
+  }
+  body.independence-theme .weather-badge,
+  body.independence-theme .prayer-badge,
+  body.independence-theme .holiday-section {
+    border-color: rgba(255,255,255,.28);
+  }
+  body.independence-theme .holiday-section {
+    background:
+      linear-gradient(110deg, rgba(153,27,27,.24), rgba(8,15,28,.40) 38%, rgba(255,255,255,.08)),
+      rgba(8,15,28,.30);
+  }
+  body.independence-theme .holiday-title {
+    color: #fff;
+    text-shadow: 0 4px 20px rgba(220,38,38,.40);
+  }
+  body.independence-theme .ticker-badge {
+    color: #fff;
+    border-color: rgba(255,255,255,.58);
+    background: rgba(185,28,28,.76);
+  }
+  .independence-label {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 13px;
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(185,28,28,.78), rgba(127,29,29,.52));
+    color: #fff;
+    font-size: clamp(11px, .82vw, 14px);
+    font-weight: 800;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    box-shadow: 0 7px 24px rgba(127,29,29,.22);
+  }
+  body.independence-theme .independence-label { display: inline-flex; }
+  .independence-label::before {
+    content: "";
+    width: 16px;
+    height: 11px;
+    border-radius: 2px;
+    background: linear-gradient(#dc2626 0 50%, #fff 50% 100%);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.28);
+  }
+  body.independence-day .independence-label {
+    animation: independenceGlow 2.4s ease-in-out infinite;
+  }
+  @keyframes independenceGlow {
+    0%, 100% { box-shadow: 0 7px 24px rgba(127,29,29,.22); }
+    50% { box-shadow: 0 7px 34px rgba(239,68,68,.56), 0 0 18px rgba(255,255,255,.18); }
+  }
 
   .dashboard-grid {
     display: grid;
@@ -899,7 +973,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
 </style>
 </head>
-<body class="<?= $isTvMode ? 'display-tv' : '' ?>">
+<body class="<?= trim(($isTvMode ? 'display-tv ' : '') . ($isIndependenceTheme ? 'independence-theme' : '')) ?>">
 
 <div class="wrapper">
   <div class="clock-card">
@@ -931,6 +1005,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
           </div>
 
           <div class="date-main" id="dateMain"></div>
+          <div class="independence-label">Dirgahayu Republik Indonesia ke-<?= (int)$independenceAnniversary ?></div>
           <div class="day-progress" id="dayProgress"></div>
 
           <div class="holiday-section" id="holidaySection">
@@ -1079,6 +1154,11 @@ let lastDayIdx = null;
 let themeOverrideDayIdx = null; // null = AUTO WIB
 
 function applyDayTheme(dayIdx){
+  if (document.body.classList.contains('independence-theme')) {
+    document.documentElement.style.setProperty('--accent-rgb', '220,38,38');
+    document.documentElement.style.setProperty('--accent2-rgb', '153,27,27');
+    return;
+  }
   const t = DAY_THEME[dayIdx] || DAY_THEME[5];
   document.documentElement.style.setProperty('--accent-rgb', t.accent);
   document.documentElement.style.setProperty('--accent2-rgb', t.accent2);
@@ -1116,6 +1196,8 @@ function getWIBParts(){
 function updateClock() {
   const p = getWIBParts();
   const { hour:h, minute:m, second:s, day:d, dayIdx, month, year } = p;
+
+  document.body.classList.toggle('independence-day', month === 8 && d === 17);
 
   const themeIdx = (themeOverrideDayIdx !== null) ? themeOverrideDayIdx : dayIdx;
   if (lastDayIdx !== themeIdx) {

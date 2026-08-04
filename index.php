@@ -1058,16 +1058,17 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 
 <div class="wrapper">
   <div class="clock-card">
-    <div class="team-intro" aria-label="Home Of Nanang, Agung, Fandy, Bimo, dan Farhan">
+    <div class="team-intro" aria-label="Home Of Nanang, Agung, Fandy, Udin, Bimo, dan Farhan">
       <span class="team-home-icon" aria-hidden="true">&#127968;</span>
       <span class="team-prefix">Home Of</span>
       <span class="team-stage">
         <span class="team-name" style="--delay:0s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Nanang</span>
         <span class="team-name" style="--delay:2s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Agung</span>
         <span class="team-name" style="--delay:4s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Fandy</span>
-        <span class="team-name" style="--delay:6s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Bimo</span>
-        <span class="team-name" style="--delay:8s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Farhan</span>
-        <span class="team-all"><span class="team-group-icon" aria-hidden="true">&#128101;</span>Nanang · Agung · Fandy · Bimo · Farhan</span>
+        <span class="team-name" style="--delay:6s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Udin</span>
+        <span class="team-name" style="--delay:8s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Bimo</span>
+        <span class="team-name" style="--delay:10s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Farhan</span>
+        <span class="team-all"><span class="team-group-icon" aria-hidden="true">&#128101;</span>Nanang · Agung · Fandy · Udin · Bimo · Farhan</span>
       </span>
     </div>
     <div class="dashboard-grid">

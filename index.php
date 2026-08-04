@@ -314,7 +314,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 <title>Jam Digital</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
   :root{
@@ -330,11 +330,11 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     --text-soft: rgba(255,255,255,.68);
 
     /* GLASS (lebih tembus background) */
-    --panel-bg: rgba(255,255,255, 0.03);
-    --panel-border: rgba(255,255,255, 0.18);
+    --panel-bg: rgba(8,15,28, 0.28);
+    --panel-border: rgba(255,255,255, 0.22);
 
-    --badge-bg: rgba(255,255,255, 0.04);
-    --badge-border: rgba(255,255,255, 0.16);
+    --badge-bg: rgba(8,15,28, 0.42);
+    --badge-border: rgba(255,255,255, 0.20);
 
     /* ===== OUTLINE TEXT (BARU) ===== */
     --outline-color: rgba(0,0,0,.92);
@@ -347,7 +347,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
      BACKGROUND FOTO (lebih terang)
      ========================= */
   body {
-    font-family: 'Roboto Mono', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: var(--text-main);
     display: flex;
     align-items: center;
@@ -407,17 +407,17 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
      ========================= */
   .clock-card {
     position: relative;
-    border-radius: 32px;
-    padding: clamp(18px, 2.6vh, 32px) clamp(20px, 2.8vw, 40px) clamp(22px, 3vh, 40px);
+    border-radius: 28px;
+    padding: clamp(18px, 2.4vh, 30px) clamp(20px, 2.4vw, 38px);
 
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
 
     /* blur kecil biar background kelihatan */
-    backdrop-filter: blur(6px) saturate(1.25);
+    backdrop-filter: blur(5px) saturate(1.18);
 
     box-shadow:
-      0 18px 70px rgba(0,0,0,0.25),
+      0 24px 80px rgba(0,0,0,0.34),
       0 0 26px rgba(var(--accent-rgb),0.10);
 
     width: 100%;
@@ -431,11 +431,11 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     content:"";
     position:absolute;
     inset:0;
-    border-radius: 32px;
+    border-radius: 28px;
     pointer-events:none;
     background: linear-gradient(
       180deg,
-      rgba(0,0,0,0.08),
+      rgba(255,255,255,0.025),
       rgba(0,0,0,0.10)
     );
   }
@@ -443,12 +443,10 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 
   .dashboard-grid {
     display: grid;
-    grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
-    grid-template-areas:
-      "left right"
-      "center center";
-    gap: 24px;
-    align-items: stretch;
+    grid-template-columns: minmax(230px, .9fr) minmax(460px, 1.8fr) minmax(230px, .9fr);
+    grid-template-areas: "left center right";
+    gap: clamp(18px, 2vw, 32px);
+    align-items: center;
   }
   .panel { min-width: 0; }
   .center-panel { display: flex; align-items: center; justify-content: center; }
@@ -461,11 +459,11 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
      ========================= */
   .weather-badge, .prayer-badge{
     padding: clamp(10px, 1.6vh, 12px) clamp(14px, 1.8vw, 18px);
-    border-radius: 20px;
+    border-radius: 18px;
     background: var(--badge-bg);
     border: 1px solid var(--badge-border);
-    backdrop-filter: blur(6px) saturate(1.2);
-    box-shadow: 0 10px 35px rgba(0,0,0,0.18);
+    backdrop-filter: blur(12px) saturate(1.15);
+    box-shadow: 0 14px 38px rgba(0,0,0,0.22);
   }
 
   .weather-badge {
@@ -477,7 +475,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
   .weather-city {
     font-size: 14px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--text-muted);
     opacity: 0.95;
@@ -527,7 +525,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
   .prayer-title {
     font-size: 14px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--text-muted);
     white-space: nowrap;
@@ -563,7 +561,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(8px, 1.6vh, 16px);
+    gap: clamp(7px, 1.2vh, 13px);
     text-align: center;
     padding: 0;
   }
@@ -573,15 +571,15 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
      ========================= */
 
   .time-display {
-    font-size: clamp(68px, 12.8vh, 132px);
+    font-size: clamp(64px, 7vw, 116px);
     font-weight: 900;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.055em;
     font-family: 'Orbitron', 'Roboto Mono', system-ui, sans-serif;
     color: #fff;
     white-space: nowrap;
 
     /* fallback outline pakai text-shadow (untuk browser non-stroke) */
-    --ol: 0.035em;
+    --ol: 0.022em;
     text-shadow:
       calc(var(--ol) * -1) 0 0 var(--outline-color),
       var(--ol) 0 0 var(--outline-color),
@@ -609,13 +607,13 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
 
   .date-main {
-    font-size: clamp(32px, 5.2vh, 58px);
-    font-weight: 900;
+    font-size: clamp(25px, 2.35vw, 42px);
+    font-weight: 800;
     color: #fff;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.035em;
 
     /* fallback outline pakai text-shadow */
-    --ol: 0.06em;
+    --ol: 0.025em;
     text-shadow:
       calc(var(--ol) * -1) 0 0 var(--outline-color),
       var(--ol) 0 0 var(--outline-color),
@@ -635,59 +633,68 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
 
   .day-progress {
-    margin-top: 4px;
-    font-size: clamp(16px, 2.6vh, 28px);
-    font-weight: 900;
-    color: #f8fafc;
-    letter-spacing: 0.04em;
+    margin-top: 2px;
+    font-size: clamp(12px, 1vw, 16px);
+    font-weight: 600;
+    color: rgba(255,255,255,.82);
+    letter-spacing: 0.015em;
     line-height: 1.15;
-    padding: 6px 12px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.35);
-    background: rgba(0,0,0,0.40);
-    text-shadow: 0 8px 24px rgba(0,0,0,0.55);
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(0,0,0,0.24);
+    text-shadow: 0 4px 14px rgba(0,0,0,0.45);
   }
 
   /* Kalau browser support stroke, pakai outline beneran mengikuti bentuk font */
   @supports (-webkit-text-stroke: 1px black) {
     .time-display{
-      -webkit-text-stroke: 0.028em var(--outline-color);
+      -webkit-text-stroke: 0.016em var(--outline-color);
       /* hilangkan outline shadow (biar tidak dobel tebal), sisakan glow/drop */
       text-shadow:
         0 12px 50px rgba(0,0,0,.45),
         0 0 30px rgba(var(--accent-rgb),.25);
     }
     .date-main{
-      -webkit-text-stroke: 0.060em var(--outline-color);
+      -webkit-text-stroke: 0.022em var(--outline-color);
       text-shadow:
         0 16px 44px rgba(0,0,0,.48),
         0 0 22px rgba(0,0,0,.38);
     }
   }
 
-  .holiday-section { margin-top: clamp(12px, 1.8vh, 22px); width: 100%; max-width: 760px; }
+  .holiday-section {
+    margin-top: clamp(8px, 1.2vh, 14px);
+    width: 100%;
+    max-width: 680px;
+    padding: clamp(12px, 1.4vh, 18px) clamp(14px, 1.4vw, 20px);
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 18px;
+    background: rgba(8,15,28,.34);
+    backdrop-filter: blur(10px);
+  }
   .holiday-title {
-    font-size: clamp(20px, 2vw, 30px);
+    font-size: clamp(15px, 1.25vw, 20px);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.10em;
     color: #f8fafc;
-    margin-bottom: 4px;
-    font-weight: 800;
+    margin-bottom: 2px;
+    font-weight: 700;
     text-shadow: 0 8px 22px rgba(0,0,0,0.55);
   }
   .holiday-source{
-    margin-top: 6px;
-    font-size: clamp(14px, 1.4vw, 20px);
-    color: rgba(255,255,255,0.94);
-    letter-spacing: .08em;
+    margin-top: 4px;
+    font-size: clamp(10px, .78vw, 12px);
+    color: rgba(255,255,255,0.62);
+    letter-spacing: .06em;
     text-transform: uppercase;
     opacity: 1;
     text-shadow: 0 6px 18px rgba(0,0,0,0.5);
   }
   .today-event-section { margin-top: 6px; margin-bottom: 12px; }
   .today-event-item {
-    font-size: clamp(20px, 3vh, 30px);
-    font-weight: 900;
+    font-size: clamp(16px, 1.5vw, 22px);
+    font-weight: 700;
     color: #fde68a;
     text-shadow: 0 12px 32px rgba(0,0,0,.35);
   }
@@ -710,7 +717,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     opacity: 0;
     transform: translateY(22px);
   }
-  .ticker-row { display: flex; align-items: center; gap: 8px; font-size: 18px; white-space: nowrap; }
+  .ticker-row { display: flex; align-items: center; gap: 8px; font-size: clamp(13px, 1vw, 16px); white-space: nowrap; }
   .ticker-date { font-weight: 900; color: #fff; }
   .ticker-name { color: #fff; font-weight: 900; }
   .ticker-separator { opacity: 0.7; color: var(--text-soft); }
@@ -855,6 +862,8 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
 
   @media (max-width: 1100px) {
+    body:not(.display-tv) { overflow-y: auto; align-items: flex-start; }
+    body:not(.display-tv) .wrapper { height: auto; min-height: 100%; }
     .dashboard-grid { grid-template-columns: 1fr; gap: 14px; }
     .dashboard-grid { grid-template-areas: "center" "left" "right"; }
     .center-panel { order: 1; }
@@ -865,9 +874,12 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
 
   @media (max-width: 768px) {
-    .clock-card { padding: 24px 20px 28px; border-radius: 24px; }
+    .wrapper { padding: 10px; }
+    .clock-card { padding: 20px 16px 22px; border-radius: 22px; }
     .clock-card::before{ border-radius: 24px; }
-    .time-display { letter-spacing: 0.09em; }
+    .time-display { font-size: clamp(48px, 15vw, 76px); letter-spacing: 0.025em; }
+    .date-main { font-size: clamp(21px, 6vw, 32px); }
+    .ticker-row { white-space: normal; justify-content: center; text-align: center; }
     .weather-badge { width: 100%; min-width: 0; }
     .prayer-badge  { width: 100%; max-width: 100%; }
   }

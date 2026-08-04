@@ -454,11 +454,11 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   body.independence-theme .clock-card::after {
     content: "";
     position: absolute;
-    top: 0;
+    top: 52px;
     left: 28px;
     right: 28px;
     height: 5px;
-    border-radius: 0 0 999px 999px;
+    border-radius: 999px;
     background: linear-gradient(90deg, #dc2626 0 50%, #fff 50% 100%);
     box-shadow: 0 2px 18px rgba(220,38,38,.28);
     pointer-events: none;
@@ -518,40 +518,23 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   .team-intro {
     position: absolute !important;
     top: 24px;
-    left: 50%;
+    left: 28px;
+    right: 28px;
     z-index: 4 !important;
-    transform: translateX(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    min-height: 28px;
-    padding: 4px 12px;
-    border: 1px solid rgba(255,255,255,.22);
-    border-radius: 999px;
-    background: rgba(8,15,28,.52);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 24px rgba(0,0,0,.20);
+    min-height: 36px;
     color: #fff;
     white-space: nowrap;
-    overflow: hidden;
-  }
-  .team-home-icon,
-  .team-person-icon,
-  .team-group-icon { line-height: 1; }
-  .team-prefix {
-    color: rgba(255,255,255,.74);
-    font-size: clamp(9px, .66vw, 12px);
-    font-weight: 800;
-    letter-spacing: .12em;
-    text-transform: uppercase;
+    pointer-events: none;
   }
   .team-stage {
     position: relative;
     display: grid;
     place-items: center;
-    width: clamp(150px, 32vw, 590px);
-    height: 18px;
+    width: 100%;
+    height: 36px;
   }
   .team-name,
   .team-all {
@@ -560,33 +543,39 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
     opacity: 0;
-    font-size: clamp(10px, .78vw, 14px);
-    font-weight: 800;
-    letter-spacing: .08em;
+    font-family: 'Orbitron', 'Inter', sans-serif;
+    font-size: clamp(20px, 1.65vw, 32px);
+    font-weight: 900;
+    letter-spacing: .12em;
     text-transform: uppercase;
-    text-shadow: 0 2px 10px rgba(0,0,0,.5);
+    color: #fff;
+    -webkit-text-stroke: 1px rgba(80,0,0,.72);
+    text-shadow: 0 3px 0 #991b1b, 0 7px 18px rgba(0,0,0,.48);
   }
   .team-name {
     animation: teamNameReveal 20s ease-in-out infinite;
     animation-delay: var(--delay);
   }
   .team-all {
-    gap: 7px;
-    font-size: clamp(8px, .66vw, 12px);
-    letter-spacing: .045em;
+    font-size: clamp(13px, 1.12vw, 21px);
+    letter-spacing: .07em;
     animation: teamAllReveal 20s ease-in-out 12s infinite;
   }
   @keyframes teamNameReveal {
-    0% { opacity: 0; transform: translateY(7px) scale(.97); filter: blur(2px); }
-    2%, 8% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-    10%, 100% { opacity: 0; transform: translateY(-7px) scale(.98); filter: blur(2px); }
+    0% { opacity: 0; transform: translateY(18px) rotate(-8deg) scale(.72); filter: blur(3px); }
+    2% { opacity: 1; transform: translateY(-8px) rotate(5deg) scale(1.08); filter: blur(0); }
+    4% { opacity: 1; transform: translateY(1px) rotate(-3deg) scale(.98); }
+    6% { opacity: 1; transform: translateY(-5px) rotate(2deg) scale(1.04); }
+    8% { opacity: 1; transform: translateY(0) rotate(0) scale(1); filter: blur(0); }
+    10%, 100% { opacity: 0; transform: translateY(-16px) rotate(7deg) scale(.80); filter: blur(3px); }
   }
   @keyframes teamAllReveal {
-    0% { opacity: 0; transform: scale(.97); filter: blur(2px); }
-    3%, 34% { opacity: 1; transform: scale(1); filter: blur(0); }
-    38%, 100% { opacity: 0; transform: scale(.98); filter: blur(2px); }
+    0% { opacity: 0; transform: translateY(12px) scale(.85); filter: blur(3px); }
+    3% { opacity: 1; transform: translateY(-5px) scale(1.04); filter: blur(0); }
+    7%, 30% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    34% { opacity: 1; transform: translateY(-4px) scale(1.02); }
+    38%, 100% { opacity: 0; transform: translateY(-14px) scale(.88); filter: blur(3px); }
   }
   @media (prefers-reduced-motion: reduce) {
     .team-name { display: none; animation: none; }
@@ -1042,9 +1031,9 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     .ticker-row { white-space: normal; justify-content: center; text-align: center; }
     .weather-badge { width: 100%; min-width: 0; }
     .prayer-badge  { width: 100%; max-width: 100%; }
-    .team-intro { top: 18px; max-width: calc(100% - 24px); padding-inline: 9px; }
-    .team-stage { width: clamp(140px, 58vw, 360px); }
-    .team-all { font-size: clamp(7px, 1.8vw, 10px); }
+    .team-intro { top: 22px; left: 12px; right: 12px; }
+    .team-name { font-size: clamp(16px, 5vw, 24px); }
+    .team-all { font-size: clamp(8px, 2.3vw, 12px); }
   }
 
   @media (max-height: 860px) {
@@ -1058,17 +1047,15 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 
 <div class="wrapper">
   <div class="clock-card">
-    <div class="team-intro" aria-label="Home Of Nanang, Agung, Fandy, Udin, Bimo, dan Farhan">
-      <span class="team-home-icon" aria-hidden="true">&#127968;</span>
-      <span class="team-prefix">Home Of</span>
+    <div class="team-intro" aria-label="Nanang, Agung, Fandy, Udin, Bimo, dan Farhan">
       <span class="team-stage">
-        <span class="team-name" style="--delay:0s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Nanang</span>
-        <span class="team-name" style="--delay:2s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Agung</span>
-        <span class="team-name" style="--delay:4s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Fandy</span>
-        <span class="team-name" style="--delay:6s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Udin</span>
-        <span class="team-name" style="--delay:8s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Bimo</span>
-        <span class="team-name" style="--delay:10s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Farhan</span>
-        <span class="team-all"><span class="team-group-icon" aria-hidden="true">&#128101;</span>Nanang · Agung · Fandy · Udin · Bimo · Farhan</span>
+        <span class="team-name" style="--delay:0s">Nanang</span>
+        <span class="team-name" style="--delay:2s">Agung</span>
+        <span class="team-name" style="--delay:4s">Fandy</span>
+        <span class="team-name" style="--delay:6s">Udin</span>
+        <span class="team-name" style="--delay:8s">Bimo</span>
+        <span class="team-name" style="--delay:10s">Farhan</span>
+        <span class="team-all">Nanang · Agung · Fandy · Udin · Bimo · Farhan</span>
       </span>
     </div>
     <div class="dashboard-grid">

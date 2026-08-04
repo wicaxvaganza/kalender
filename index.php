@@ -515,6 +515,84 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     50% { box-shadow: 0 7px 34px rgba(239,68,68,.56), 0 0 18px rgba(255,255,255,.18); }
   }
 
+  .team-intro {
+    position: absolute !important;
+    top: 24px;
+    left: 50%;
+    z-index: 4 !important;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 28px;
+    padding: 4px 12px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 999px;
+    background: rgba(8,15,28,.52);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.20);
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .team-home-icon,
+  .team-person-icon,
+  .team-group-icon { line-height: 1; }
+  .team-prefix {
+    color: rgba(255,255,255,.74);
+    font-size: clamp(9px, .66vw, 12px);
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .team-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(150px, 32vw, 590px);
+    height: 18px;
+  }
+  .team-name,
+  .team-all {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    opacity: 0;
+    font-size: clamp(10px, .78vw, 14px);
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0,0,0,.5);
+  }
+  .team-name {
+    animation: teamNameReveal 20s ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+  .team-all {
+    gap: 7px;
+    font-size: clamp(8px, .66vw, 12px);
+    letter-spacing: .045em;
+    animation: teamAllReveal 20s ease-in-out 12s infinite;
+  }
+  @keyframes teamNameReveal {
+    0% { opacity: 0; transform: translateY(7px) scale(.97); filter: blur(2px); }
+    2%, 8% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    10%, 100% { opacity: 0; transform: translateY(-7px) scale(.98); filter: blur(2px); }
+  }
+  @keyframes teamAllReveal {
+    0% { opacity: 0; transform: scale(.97); filter: blur(2px); }
+    3%, 34% { opacity: 1; transform: scale(1); filter: blur(0); }
+    38%, 100% { opacity: 0; transform: scale(.98); filter: blur(2px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .team-name { display: none; animation: none; }
+    .team-all { opacity: 1; animation: none; }
+  }
+
   .dashboard-grid {
     display: grid;
     grid-template-columns: minmax(230px, .9fr) minmax(460px, 1.8fr) minmax(230px, .9fr);
@@ -964,6 +1042,9 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     .ticker-row { white-space: normal; justify-content: center; text-align: center; }
     .weather-badge { width: 100%; min-width: 0; }
     .prayer-badge  { width: 100%; max-width: 100%; }
+    .team-intro { top: 18px; max-width: calc(100% - 24px); padding-inline: 9px; }
+    .team-stage { width: clamp(140px, 58vw, 360px); }
+    .team-all { font-size: clamp(7px, 1.8vw, 10px); }
   }
 
   @media (max-height: 860px) {
@@ -977,6 +1058,18 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 
 <div class="wrapper">
   <div class="clock-card">
+    <div class="team-intro" aria-label="Home Of Nanang, Agung, Fandy, Bimo, dan Farhan">
+      <span class="team-home-icon" aria-hidden="true">&#127968;</span>
+      <span class="team-prefix">Home Of</span>
+      <span class="team-stage">
+        <span class="team-name" style="--delay:0s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Nanang</span>
+        <span class="team-name" style="--delay:2s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Agung</span>
+        <span class="team-name" style="--delay:4s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Fandy</span>
+        <span class="team-name" style="--delay:6s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Bimo</span>
+        <span class="team-name" style="--delay:8s"><span class="team-person-icon" aria-hidden="true">&#128100;</span>Farhan</span>
+        <span class="team-all"><span class="team-group-icon" aria-hidden="true">&#128101;</span>Nanang · Agung · Fandy · Bimo · Farhan</span>
+      </span>
+    </div>
     <div class="dashboard-grid">
       <div class="panel left-panel">
         <!-- CUACA -->

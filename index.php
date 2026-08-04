@@ -566,22 +566,13 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     -webkit-text-stroke: 0;
     text-shadow: 0 2px 10px rgba(127,29,29,.72);
   }
-  .team-name {
-    animation: teamNameReveal 30s ease-in-out infinite;
-    animation-delay: var(--delay);
-  }
   .team-all {
     font-size: clamp(24px, 1.85vw, 36px);
     letter-spacing: .07em;
-    animation: teamAllReveal 30s ease-in-out 12s infinite;
   }
   .team-message {
     font-size: clamp(30px, 2.55vw, 50px);
     letter-spacing: .09em;
-    animation: teamMessageReveal 30s cubic-bezier(.22,.61,.36,1) infinite;
-  }
-  .team-message.hospital-name {
-    animation-delay: 18s;
   }
   .team-message.service-motto {
     max-width: 1100px;
@@ -590,29 +581,66 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     font-size: clamp(23px, 1.85vw, 36px);
     letter-spacing: .04em;
     text-transform: none;
-    animation-delay: 23s;
   }
-  @keyframes teamNameReveal {
-    0% { opacity: 0; transform: translateY(18px) rotate(-8deg) scale(.72); filter: blur(3px); }
-    1% { opacity: 1; transform: translateY(-4px) rotate(5deg) scale(1.08); filter: blur(0); }
-    2.5% { opacity: 1; transform: translateY(1px) rotate(-3deg) scale(.98); }
-    4% { opacity: 1; transform: translateY(-3px) rotate(2deg) scale(1.04); }
-    5.5% { opacity: 1; transform: translateY(0) rotate(0) scale(1); filter: blur(0); }
-    6.7%, 100% { opacity: 0; transform: translateY(-16px) rotate(7deg) scale(.80); filter: blur(3px); }
+  .team-fx {
+    animation-duration: var(--team-duration, 2400ms);
+    animation-fill-mode: forwards;
+    animation-timing-function: cubic-bezier(.22,.61,.36,1);
   }
-  @keyframes teamAllReveal {
-    0% { opacity: 0; transform: translateY(12px) scale(.85); filter: blur(3px); }
-    1.5% { opacity: 1; transform: translateY(-5px) scale(1.04); filter: blur(0); }
-    3%, 13% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-    15% { opacity: 0; transform: translateY(-14px) scale(.88); filter: blur(3px); }
-    100% { opacity: 0; }
+  .fx-bounce { animation-name: teamFxBounce; }
+  .fx-slide-left { animation-name: teamFxSlideLeft; }
+  .fx-slide-right { animation-name: teamFxSlideRight; }
+  .fx-zoom-spin { animation-name: teamFxZoomSpin; }
+  .fx-flip { animation-name: teamFxFlip; }
+  .fx-swing { animation-name: teamFxSwing; transform-origin: top center; }
+  .fx-blur-rise { animation-name: teamFxBlurRise; }
+  .fx-elastic { animation-name: teamFxElastic; }
+
+  @keyframes teamFxBounce {
+    0% { opacity: 0; transform: translateY(24px) scale(.8); }
+    14% { opacity: 1; transform: translateY(-9px) scale(1.08); }
+    25%, 78% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-18px) scale(.9); }
   }
-  @keyframes teamMessageReveal {
-    0% { opacity: 0; transform: translateX(-40px) skewX(-8deg) scale(.94); filter: blur(4px); }
-    2% { opacity: 1; transform: translateX(8px) skewX(2deg) scale(1.04); filter: blur(0); }
-    4%, 13% { opacity: 1; transform: translateX(0) skewX(0) scale(1); filter: blur(0); }
-    15% { opacity: 0; transform: translateX(40px) skewX(8deg) scale(.94); filter: blur(4px); }
-    100% { opacity: 0; }
+  @keyframes teamFxSlideLeft {
+    0% { opacity: 0; transform: translateX(-110px) skewX(-10deg); }
+    18%, 78% { opacity: 1; transform: translateX(0) skewX(0); }
+    100% { opacity: 0; transform: translateX(90px) skewX(8deg); }
+  }
+  @keyframes teamFxSlideRight {
+    0% { opacity: 0; transform: translateX(110px) skewX(10deg); }
+    18%, 78% { opacity: 1; transform: translateX(0) skewX(0); }
+    100% { opacity: 0; transform: translateX(-90px) skewX(-8deg); }
+  }
+  @keyframes teamFxZoomSpin {
+    0% { opacity: 0; transform: scale(.3) rotate(-16deg); filter: blur(5px); }
+    20% { opacity: 1; transform: scale(1.08) rotate(3deg); filter: blur(0); }
+    30%, 78% { opacity: 1; transform: scale(1) rotate(0); }
+    100% { opacity: 0; transform: scale(.65) rotate(12deg); filter: blur(4px); }
+  }
+  @keyframes teamFxFlip {
+    0% { opacity: 0; transform: perspective(500px) rotateX(-90deg); }
+    20%, 78% { opacity: 1; transform: perspective(500px) rotateX(0); }
+    100% { opacity: 0; transform: perspective(500px) rotateX(90deg); }
+  }
+  @keyframes teamFxSwing {
+    0% { opacity: 0; transform: rotate(-18deg) translateY(-10px); }
+    16% { opacity: 1; transform: rotate(8deg); }
+    28% { transform: rotate(-4deg); }
+    38%, 78% { opacity: 1; transform: rotate(0); }
+    100% { opacity: 0; transform: rotate(12deg) translateY(-12px); }
+  }
+  @keyframes teamFxBlurRise {
+    0% { opacity: 0; transform: translateY(20px); filter: blur(10px); letter-spacing: .3em; }
+    22%, 78% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    100% { opacity: 0; transform: translateY(-16px); filter: blur(8px); letter-spacing: .2em; }
+  }
+  @keyframes teamFxElastic {
+    0% { opacity: 0; transform: scaleX(.25) scaleY(1.35); }
+    16% { opacity: 1; transform: scaleX(1.15) scaleY(.9); }
+    28% { transform: scaleX(.94) scaleY(1.05); }
+    38%, 78% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scaleX(1.3) scaleY(.7); }
   }
   @media (prefers-reduced-motion: reduce) {
     .team-name { display: none; animation: none; }
@@ -1805,6 +1833,59 @@ function updatePrayerList() {
   prayerListEl.innerHTML = html;
 }
 
+// Delapan transisi acak untuk nama tim, nama rumah sakit, dan slogan.
+function startRandomTeamSequence() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const items = [
+    ...Array.from(document.querySelectorAll('.team-name')).map((element) => ({ element, duration: 2200 })),
+    { element: document.querySelector('.team-all'), duration: 5000 },
+    { element: document.querySelector('.hospital-name'), duration: 4500 },
+    { element: document.querySelector('.service-motto'), duration: 6000 },
+  ].filter((item) => item.element);
+
+  const effects = [
+    'fx-bounce',
+    'fx-slide-left',
+    'fx-slide-right',
+    'fx-zoom-spin',
+    'fx-flip',
+    'fx-swing',
+    'fx-blur-rise',
+    'fx-elastic',
+  ];
+
+  if (!items.length) return;
+
+  let itemIndex = 0;
+  let previousEffect = '';
+
+  function showNextItem() {
+    const item = items[itemIndex];
+    let effect = effects[Math.floor(Math.random() * effects.length)];
+
+    if (effects.length > 1) {
+      while (effect === previousEffect) {
+        effect = effects[Math.floor(Math.random() * effects.length)];
+      }
+    }
+
+    previousEffect = effect;
+    item.element.classList.remove('team-fx', ...effects);
+    item.element.style.setProperty('--team-duration', `${item.duration}ms`);
+    void item.element.offsetWidth;
+    item.element.classList.add('team-fx', effect);
+
+    window.setTimeout(() => {
+      item.element.classList.remove('team-fx', effect);
+      itemIndex = (itemIndex + 1) % items.length;
+      showNextItem();
+    }, item.duration);
+  }
+
+  showNextItem();
+}
+
 // Reload setelah ganti hari (WIB) supaya data PHP ikut update
 function scheduleReloadAfterMidnight() {
   const p = getWIBParts();
@@ -1830,6 +1911,7 @@ setInterval(fetchBmkgWeather, 10 * 60 * 1000);
 fetchJadwalSholat();
 setInterval(updatePrayerList, 60 * 1000);
 
+startRandomTeamSequence();
 scheduleReloadAfterMidnight();
 </script>
 

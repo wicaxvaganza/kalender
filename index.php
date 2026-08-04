@@ -454,7 +454,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   body.independence-theme .clock-card::after {
     content: "";
     position: absolute;
-    top: 52px;
+    top: 58px;
     left: 28px;
     right: 28px;
     height: 5px;
@@ -517,14 +517,14 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 
   .team-intro {
     position: absolute !important;
-    top: 24px;
+    top: 18px;
     left: 28px;
     right: 28px;
     z-index: 4 !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 36px;
+    min-height: 42px;
     color: #fff;
     white-space: nowrap;
     pointer-events: none;
@@ -534,7 +534,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     display: grid;
     place-items: center;
     width: 100%;
-    height: 36px;
+    height: 42px;
   }
   .team-name,
   .team-all {
@@ -545,7 +545,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     justify-content: center;
     opacity: 0;
     font-family: 'Orbitron', 'Inter', sans-serif;
-    font-size: clamp(20px, 1.65vw, 32px);
+    font-size: clamp(26px, 2.1vw, 40px);
     font-weight: 900;
     letter-spacing: .12em;
     text-transform: uppercase;
@@ -558,15 +558,15 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     animation-delay: var(--delay);
   }
   .team-all {
-    font-size: clamp(13px, 1.12vw, 21px);
+    font-size: clamp(16px, 1.35vw, 25px);
     letter-spacing: .07em;
     animation: teamAllReveal 20s ease-in-out 12s infinite;
   }
   @keyframes teamNameReveal {
     0% { opacity: 0; transform: translateY(18px) rotate(-8deg) scale(.72); filter: blur(3px); }
-    2% { opacity: 1; transform: translateY(-8px) rotate(5deg) scale(1.08); filter: blur(0); }
+    2% { opacity: 1; transform: translateY(-4px) rotate(5deg) scale(1.08); filter: blur(0); }
     4% { opacity: 1; transform: translateY(1px) rotate(-3deg) scale(.98); }
-    6% { opacity: 1; transform: translateY(-5px) rotate(2deg) scale(1.04); }
+    6% { opacity: 1; transform: translateY(-3px) rotate(2deg) scale(1.04); }
     8% { opacity: 1; transform: translateY(0) rotate(0) scale(1); filter: blur(0); }
     10%, 100% { opacity: 0; transform: translateY(-16px) rotate(7deg) scale(.80); filter: blur(3px); }
   }
@@ -1031,9 +1031,9 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     .ticker-row { white-space: normal; justify-content: center; text-align: center; }
     .weather-badge { width: 100%; min-width: 0; }
     .prayer-badge  { width: 100%; max-width: 100%; }
-    .team-intro { top: 22px; left: 12px; right: 12px; }
-    .team-name { font-size: clamp(16px, 5vw, 24px); }
-    .team-all { font-size: clamp(8px, 2.3vw, 12px); }
+    .team-intro { top: 16px; left: 12px; right: 12px; }
+    .team-name { font-size: clamp(20px, 6vw, 30px); }
+    .team-all { font-size: clamp(10px, 2.8vw, 15px); }
   }
 
   @media (max-height: 860px) {

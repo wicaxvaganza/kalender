@@ -454,7 +454,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   body.independence-theme .clock-card::after {
     content: "";
     position: absolute;
-    top: 58px;
+    top: 0;
     left: 28px;
     right: 28px;
     height: 5px;
@@ -517,7 +517,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
 
   .team-intro {
     position: absolute !important;
-    top: 18px;
+    top: -60px;
     left: 28px;
     right: 28px;
     z-index: 4 !important;
@@ -1031,7 +1031,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     .ticker-row { white-space: normal; justify-content: center; text-align: center; }
     .weather-badge { width: 100%; min-width: 0; }
     .prayer-badge  { width: 100%; max-width: 100%; }
-    .team-intro { top: 16px; left: 12px; right: 12px; }
+    .team-intro { top: -52px; left: 12px; right: 12px; }
     .team-name { font-size: clamp(20px, 6vw, 30px); }
     .team-all { font-size: clamp(10px, 2.8vw, 15px); }
   }

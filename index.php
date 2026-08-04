@@ -571,7 +571,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     animation-delay: var(--delay);
   }
   .team-all {
-    font-size: clamp(16px, 1.35vw, 25px);
+    font-size: clamp(24px, 1.85vw, 36px);
     letter-spacing: .07em;
     animation: teamAllReveal 30s ease-in-out 12s infinite;
   }
@@ -1071,7 +1071,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     .prayer-badge  { width: 100%; max-width: 100%; }
     .team-intro { top: -52px; left: 12px; right: 12px; }
     .team-name { font-size: clamp(20px, 6vw, 30px); }
-    .team-all { font-size: clamp(10px, 2.8vw, 15px); }
+    .team-all { font-size: clamp(12px, 3.4vw, 18px); }
     .team-message { font-size: clamp(17px, 4.8vw, 24px); }
     .team-message.service-motto { font-size: clamp(11px, 3.2vw, 16px); }
   }

@@ -1010,6 +1010,54 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     border-color: rgba(var(--accent-rgb), 0.35);
   }
 
+  .daily-reminder-control{
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .reminder-test-button{
+    appearance: none;
+    border: 1px solid rgba(255,255,255,.30);
+    border-radius: 999px;
+    padding: 10px 16px;
+    background: rgba(8,15,28,.56);
+    color: #fff;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 32px rgba(0,0,0,.30);
+    font: 800 12px/1 'Inter', sans-serif;
+    letter-spacing: .04em;
+    cursor: pointer;
+  }
+  .reminder-test-button:hover{ background: rgba(var(--accent-rgb),.38); }
+  .reminder-alert{
+    position: fixed;
+    inset: 24px;
+    z-index: 10001;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(.96);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .reminder-alert.is-visible{ opacity: 1; transform: scale(1); }
+  .reminder-alert-message{
+    max-width: 760px;
+    padding: 24px 32px;
+    border: 2px solid rgba(255,255,255,.65);
+    border-radius: 24px;
+    background: rgba(153,27,27,.92);
+    color: #fff;
+    box-shadow: 0 24px 90px rgba(0,0,0,.55);
+    text-align: center;
+    font-size: clamp(22px, 3vw, 42px);
+    font-weight: 900;
+  }
+
   /* =========================
      TV MODE (32")
      aktif via ?display=tv
@@ -1203,6 +1251,15 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   </div>
 </div>
 
+<div class="daily-reminder-control">
+  <button type="button" class="reminder-test-button" id="reminderTestButton">
+    &#128266; Tes Pengingat 08.55
+  </button>
+</div>
+<div class="reminder-alert" id="reminderAlert" role="alert" aria-live="assertive">
+  <div class="reminder-alert-message">Persiapan, jangan lupa war telur Shopee ya!</div>
+</div>
+
 <!-- ===== Theme Tester Helper (auto-hide) ===== -->
 <?php if ($debugMode): ?>
 <div class="theme-tester" id="themeTester">
@@ -1243,6 +1300,8 @@ const weatherNextHourValue = document.getElementById('weatherNextHourValue');
 // Elemen jadwal sholat
 const prayerListEl = document.getElementById('prayerList');
 const prayerInfoEl = document.getElementById('prayerInfo');
+const reminderTestButton = document.getElementById('reminderTestButton');
+const reminderAlert = document.getElementById('reminderAlert');
 
 let jadwalSholatToday = null;
 let lastRenderedSecond = null;
@@ -1565,6 +1624,71 @@ function renderHolidaySection() {
     tickerBaseIndex = 0;
     updateTicker();
   }
+
+  checkDailyReminder(p);
+}
+
+// ===== Pengingat harian war telur Shopee, pukul 08.55 WIB =====
+const DAILY_REMINDER_HOUR = 8;
+const DAILY_REMINDER_MINUTE = 55;
+const DAILY_REMINDER_TEXT = 'Persiapan, jangan lupa war telur Shopee ya!';
+let reminderAlertTimer = null;
+
+function playReminderSound() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      const audioContext = new AudioContextClass();
+      const start = audioContext.currentTime;
+      [0, .28, .56].forEach((delay) => {
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.frequency.value = 880;
+        gain.gain.setValueAtTime(.001, start + delay);
+        gain.gain.exponentialRampToValueAtTime(.28, start + delay + .02);
+        gain.gain.exponentialRampToValueAtTime(.001, start + delay + .20);
+        oscillator.connect(gain).connect(audioContext.destination);
+        oscillator.start(start + delay);
+        oscillator.stop(start + delay + .22);
+      });
+      window.setTimeout(() => audioContext.close(), 1200);
+    }
+  } catch (error) {
+    console.warn('Nada pengingat tidak dapat diputar:', error);
+  }
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const speech = new SpeechSynthesisUtterance(DAILY_REMINDER_TEXT);
+    speech.lang = 'id-ID';
+    speech.rate = .9;
+    speech.volume = 1;
+    window.speechSynthesis.speak(speech);
+  }
+}
+
+function triggerDailyReminder() {
+  if (reminderAlert) {
+    reminderAlert.classList.add('is-visible');
+    clearTimeout(reminderAlertTimer);
+    reminderAlertTimer = setTimeout(() => reminderAlert.classList.remove('is-visible'), 10000);
+  }
+  playReminderSound();
+}
+
+function checkDailyReminder(parts) {
+  if (parts.hour !== DAILY_REMINDER_HOUR || parts.minute !== DAILY_REMINDER_MINUTE) return;
+
+  const dateKey = `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`;
+  const storageKey = 'shopeeEggReminderLastDate';
+  if (localStorage.getItem(storageKey) === dateKey) return;
+
+  localStorage.setItem(storageKey, dateKey);
+  triggerDailyReminder();
+}
+
+if (reminderTestButton) {
+  reminderTestButton.addEventListener('click', triggerDailyReminder);
 }
 
 async function fetchHolidayData() {

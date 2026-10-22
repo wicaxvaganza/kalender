@@ -858,24 +858,10 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     color: #fff;
     letter-spacing: 0.035em;
 
-    /* fallback outline pakai text-shadow */
-    --ol: 0.025em;
+    /* Bayangan lembut menjaga keterbacaan tanpa stroke pada sambungan huruf. */
     text-shadow:
-      calc(var(--ol) * -1) 0 0 var(--outline-color),
-      var(--ol) 0 0 var(--outline-color),
-      0 calc(var(--ol) * -1) 0 var(--outline-color),
-      0 var(--ol) 0 var(--outline-color),
-      calc(var(--ol) * -1) calc(var(--ol) * -1) 0 var(--outline-color),
-      var(--ol) calc(var(--ol) * -1) 0 var(--outline-color),
-      calc(var(--ol) * -1) var(--ol) 0 var(--outline-color),
-      var(--ol) var(--ol) 0 var(--outline-color),
-
-      /* shadow asli kamu (tetap) */
-      0 16px 44px rgba(0,0,0,.48),
-      0 0 22px rgba(0,0,0,.38);
-
-    -webkit-font-smoothing: antialiased;
-    text-rendering: geometricPrecision;
+      0 2px 4px rgba(0,0,0,.85),
+      0 6px 18px rgba(0,0,0,.55);
   }
 
   .national-day {
@@ -917,12 +903,6 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
       text-shadow:
         0 12px 50px rgba(0,0,0,.45),
         0 0 30px rgba(var(--accent-rgb),.25);
-    }
-    .date-main{
-      -webkit-text-stroke: 0.022em var(--outline-color);
-      text-shadow:
-        0 16px 44px rgba(0,0,0,.48),
-        0 0 22px rgba(0,0,0,.38);
     }
   }
 

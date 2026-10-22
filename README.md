@@ -58,6 +58,7 @@ Contoh:
 ## 🔌 Integrasi API
 
 - 🎌 Libur nasional: `https://app.opica.id/api-libur/api?year=YYYY`
+- Hari nasional hari ini (WIB): `https://app.opica.id/api-libur/api/hari-nasional/YYYY-MM-DD`. Hanya tampil jika ada event; respons kosong atau gagal tidak menampilkan apa pun.
 - 🌦️ BMKG cuaca: `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=35.10.16.1010`
 - 🕌 Jadwal sholat: `https://api.myquran.com/v2/sholat/jadwal/1602/YYYY/M/D`
 

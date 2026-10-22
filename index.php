@@ -297,6 +297,45 @@ if (isset($_GET['libur']) && (string)$_GET['libur'] === '1') {
 }
 
 // ==========================
+// HARI NASIONAL HARI INI (bukan penanda hari libur)
+// ==========================
+$nationalDayNames = [];
+$nationalDayUrl = "https://app.opica.id/api-libur/api/hari-nasional/{$todayStr}";
+$nationalDayContext = stream_context_create([
+  'http' => [
+    'timeout' => 5,
+    'ignore_errors' => true,
+    'header' => "Accept: application/json\r\nUser-Agent: Kalender-RSBL/1.0\r\n",
+  ],
+]);
+$rawNationalDay = @file_get_contents($nationalDayUrl, false, $nationalDayContext);
+if ($rawNationalDay === false && function_exists('curl_init')) {
+  $ch = curl_init($nationalDayUrl);
+  if ($ch !== false) {
+    curl_setopt_array($ch, [
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_CONNECTTIMEOUT => 3,
+      CURLOPT_TIMEOUT => 5,
+      CURLOPT_HTTPHEADER => ['Accept: application/json'],
+    ]);
+    $rawNationalDay = curl_exec($ch);
+    curl_close($ch);
+  }
+}
+$nationalDayData = json_decode((string)$rawNationalDay, true);
+if (is_array($nationalDayData) && ($nationalDayData['status'] ?? '') === 'success'
+    && isset($nationalDayData['data']) && is_array($nationalDayData['data'])) {
+  foreach ($nationalDayData['data'] as $item) {
+    if (!is_array($item) || ($item['date'] ?? '') !== $todayStr) continue;
+    $name = $item['name'] ?? '';
+    if (is_string($name) && trim($name) !== '') {
+      $nationalDayNames[] = trim($name);
+    }
+  }
+  $nationalDayNames = array_values(array_unique($nationalDayNames));
+}
+
+// ==========================
 // 2) API BMKG PRAKIRAAN CUACA (adm4 = 35.10.16.1010)
 // ==========================
 [$bmkgForecastFlat, $bmkgError] = loadBmkgForecastData();
@@ -839,6 +878,16 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
     text-rendering: geometricPrecision;
   }
 
+  .national-day {
+    margin-top: 8px;
+    max-width: 100%;
+    font-size: clamp(14px, 1.2vw, 22px);
+    font-weight: 700;
+    line-height: 1.4;
+    color: #fde68a;
+    overflow-wrap: anywhere;
+  }
+
   .day-progress {
     margin-top: 2px;
     font-size: clamp(12px, 1vw, 16px);
@@ -1156,6 +1205,13 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
           </div>
 
           <div class="date-main" id="dateMain"></div>
+          <?php if (!empty($nationalDayNames)): ?>
+            <div class="national-day" aria-label="Hari nasional hari ini">
+              <?php foreach ($nationalDayNames as $name): ?>
+                <div><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?></div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
           <div class="independence-label">Dirgahayu Republik Indonesia ke-<?= (int)$independenceAnniversary ?></div>
           <div class="day-progress" id="dayProgress"></div>
 

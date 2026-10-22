@@ -1215,7 +1215,7 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
           <div class="independence-label">Dirgahayu Republik Indonesia ke-<?= (int)$independenceAnniversary ?></div>
           <div class="day-progress" id="dayProgress"></div>
 
-          <div class="holiday-section" id="holidaySection">
+          <div class="holiday-section" id="holidaySection" <?php if ($errorLibur || !$hasUpcoming) echo 'style="display:none"'; ?>>
             <div class="holiday-title">HARI LIBUR BULAN INI</div>
             <div class="holiday-source" id="holidaySource">Sumber: <?= htmlspecialchars($liburSource) ?></div>
             <div class="holiday-status" id="holidayStatus">
@@ -1584,6 +1584,11 @@ function updateTicker() {
 }
 
 function renderHolidaySection() {
+  if (holidaySectionEl) {
+    holidaySectionEl.style.display = !holidayError && holidayHasUpcoming
+      && (holidayTodayEvents.length || tickerEvents.length) ? '' : 'none';
+  }
+
   if (holidaySourceEl) {
     holidaySourceEl.textContent = `Sumber: ${holidaySource || 'Tidak tersedia'}`;
   }

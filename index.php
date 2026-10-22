@@ -879,12 +879,19 @@ $bgUrl  = $bgFile . '?v=' . (int)$bgVer;
   }
 
   .national-day {
-    margin-top: 8px;
+    margin: 10px 0 8px;
     max-width: 100%;
-    font-size: clamp(14px, 1.2vw, 22px);
-    font-weight: 700;
-    line-height: 1.4;
-    color: #fde68a;
+    font-size: clamp(20px, 1.8vw, 32px);
+    font-weight: 900;
+    line-height: 1.3;
+    letter-spacing: .025em;
+    color: #ffdf6b;
+    -webkit-text-stroke: .5px rgba(50, 30, 0, .9);
+    paint-order: stroke fill;
+    text-shadow:
+      0 2px 2px rgba(0,0,0,.95),
+      0 4px 12px rgba(0,0,0,.85),
+      0 0 22px rgba(255,207,64,.3);
     overflow-wrap: anywhere;
   }
 
